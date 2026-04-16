@@ -3,14 +3,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
-  // 1. Creamos una respuesta inicial
+  // 1. Create initial response
   let res = NextResponse.next({
     request: {
       headers: req.headers,
     },
   })
 
-  // 2. Configuramos el cliente de Supabase
+  // 2. Configure Supabase client
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -20,16 +20,12 @@ export async function middleware(req: NextRequest) {
           return req.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          // Actualizamos las cookies en la petición original para que 
-          // los componentes que lean de 'req' vean los cambios inmediatamente
           cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value))
           
-          // Sincronizamos la respuesta con la petición actualizada
           res = NextResponse.next({
             request: req,
           })
 
-          // Escribimos las cookies en la respuesta final para el navegador
           cookiesToSet.forEach(({ name, value, options }) =>
             res.cookies.set(name, value, options)
           )
@@ -38,22 +34,23 @@ export async function middleware(req: NextRequest) {
     }
   )
 
-  // 3. Obtenemos la sesión (esto dispara setAll si es necesario refrescar el token)
+  // 3. SECURE: Verify user via getUser() instead of just reading the session
+  // This validates the token with the Supabase Auth server
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  // 4. Lógica de protección de rutas
+  // 4. Route Protection Logic
   const url = req.nextUrl.clone()
 
-  // Si no hay sesión y va a la raíz, al login
-  if (!session && url.pathname === '/') {
+  // If no user exists and they are trying to access protected root, redirect to login
+  if (!user && url.pathname === '/') {
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // Si hay sesión e intenta ir al login, al home
-  if (session && url.pathname === '/login') {
+  // If user is logged in and tries to access login page, redirect to home
+  if (user && url.pathname === '/login') {
     url.pathname = '/'
     return NextResponse.redirect(url)
   }
@@ -63,6 +60,13 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }

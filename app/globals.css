@@ -56,3 +56,20 @@
     background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
   }
 }
+
+@layer utilities {
+  /* Barra de desplazamiento personalizada */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 10px;
+  }
+
+  /* Opcional: Color de fondo de la barra en hover para mejor UX */
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+  }
+}

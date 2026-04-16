@@ -1,10 +1,14 @@
 import { 
-  PlusIcon, ArrowUpCircle, ArrowDownCircle, Wallet, 
-  LayoutDashboard, History, Settings, PieChart 
+  ArrowUpCircle, ArrowDownCircle, Wallet, 
+  LayoutDashboard, History, Settings, PieChart
 } from "lucide-react";
+
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import LogoutButton from "@/components/LogoutButton";
+import LogoutButton from "@/components/auth/LogoutButton";
+import AddTransactionModal from "@/components/AddTransactionModal";
+import { DynamicIcon } from "@/components/DynamicIcon";
+
 
 export default async function HomePage() {
   const cookieStore = await cookies(); 
@@ -19,18 +23,20 @@ export default async function HomePage() {
     }
   );
 
-  // 1. Obtenemos la sesión para el sidebar
-  const { data: { session } } = await supabase.auth.getSession();
+  // SECURE AUTH: Usando getUser() para verificar la sesión en el servidor
+  const { data: { user } } = await supabase.auth.getUser();
 
-  // 2. Fetch de transacciones
+  // Fetch de transacciones con Join a categorías
   const { data: transactions } = await supabase
     .from('transactions')
     .select('*, categories(name, icon, color)')
     .order('date', { ascending: false });
 
   // Cálculos de balance
-  const totalIncome = transactions?.filter(tx => tx.amount > 0).reduce((acc, tx) => acc + Number(tx.amount), 0) || 0;
-  const totalExpense = transactions?.filter(tx => tx.amount < 0).reduce((acc, tx) => acc + Math.abs(Number(tx.amount)), 0) || 0;
+  const totalIncome = transactions?.filter(tx => tx.amount > 0)
+    .reduce((acc, tx) => acc + Number(tx.amount), 0) || 0;
+  const totalExpense = transactions?.filter(tx => tx.amount < 0)
+    .reduce((acc, tx) => acc + Math.abs(Number(tx.amount)), 0) || 0;
   const balance = totalIncome - totalExpense;
 
   return (
@@ -52,12 +58,11 @@ export default async function HomePage() {
           <NavItem icon={<Settings size={20}/>} label="Configuración" />
         </nav>
 
-        {/* SECCIÓN DE USUARIO Y LOGOUT */}
         <div className="pt-6 mt-6 border-t border-slate-800/50 space-y-4">
           <div className="px-4 py-3 bg-slate-900/50 rounded-2xl border border-slate-800/50">
             <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1">Sesión Iniciada</p>
             <p className="text-xs font-bold truncate opacity-80">
-              {session?.user?.email || "usuario@app.com"}
+              {user?.email || "usuario@app.com"}
             </p>
           </div>
           <LogoutButton />
@@ -67,13 +72,11 @@ export default async function HomePage() {
       <main className="flex-1 max-w-6xl mx-auto p-8">
         <header className="flex justify-between items-center mb-10">
           <h1 className="text-2xl font-bold tracking-tight">Panel de Control</h1>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2">
-            <PlusIcon size={18} />
-            <span>Nuevo Registro</span>
-          </button>
+          <AddTransactionModal />
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Resumen de Balance */}
           <section className="md:col-span-2">
             <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden text-white">
               <p className="text-blue-100/70 text-sm font-medium uppercase tracking-wider">Balance total</p>
@@ -83,30 +86,42 @@ export default async function HomePage() {
               </h2>
               <div className="flex gap-10 mt-12 pt-8 border-t border-white/10">
                 <div>
-                  <span className="flex items-center gap-1.5 text-xs text-blue-100/60 mb-2 font-bold"><ArrowUpCircle size={14} className="text-green-400" /> INGRESOS</span>
+                  <span className="flex items-center gap-1.5 text-xs text-blue-100/60 mb-2 font-bold">
+                    <ArrowUpCircle size={14} className="text-green-400" /> INGRESOS
+                  </span>
                   <span className="text-2xl font-bold">${totalIncome.toLocaleString()}</span>
                 </div>
                 <div>
-                  <span className="flex items-center gap-1.5 text-xs text-blue-100/60 mb-2 font-bold"><ArrowDownCircle size={14} className="text-red-400" /> GASTOS</span>
+                  <span className="flex items-center gap-1.5 text-xs text-blue-100/60 mb-2 font-bold">
+                    <ArrowDownCircle size={14} className="text-red-400" /> GASTOS
+                  </span>
                   <span className="text-2xl font-bold">${totalExpense.toLocaleString()}</span>
                 </div>
               </div>
             </div>
           </section>
 
+          {/* Actividad Reciente Dinámica */}
           <section className="md:col-span-3 mt-10">
             <h2 className="text-xl font-bold mb-6">Actividad reciente</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {transactions?.map((tx) => (
                 <div key={tx.id} className="flex items-center justify-between p-5 rounded-3xl bg-slate-900 border border-slate-800 hover:border-blue-500/30 transition-all">
                   <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-2xl ${tx.amount > 0 ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}`}>
-                      {tx.amount > 0 ? <ArrowUpCircle size={22} /> : <Wallet size={22} />}
+                    {/* Contenedor de icono con color de categoría dinámico */}
+                    <div 
+                      className="p-3 rounded-2xl" 
+                      style={{ 
+                        backgroundColor: tx.categories?.color ? `${tx.categories.color}20` : '#1e293b', 
+                        color: tx.categories?.color || '#64748b' 
+                      }}
+                    >
+                      <DynamicIcon name={tx.categories?.icon} size={22} />
                     </div>
                     <div>
                       <p className="font-bold text-sm">{tx.description}</p>
                       <p className="text-[10px] opacity-40 font-bold uppercase tracking-widest">
-                        {new Date(tx.date).toLocaleDateString()}
+                        {tx.categories?.name || 'General'} • {new Date(tx.date).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -115,6 +130,7 @@ export default async function HomePage() {
                   </p>
                 </div>
               ))}
+              
               {(!transactions || transactions.length === 0) && (
                 <div className="col-span-3 text-center py-20 bg-slate-900/50 rounded-[2.5rem] border border-dashed border-slate-800">
                   <p className="opacity-40 font-medium">No hay transacciones registradas.</p>
