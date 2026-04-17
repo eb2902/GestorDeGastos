@@ -1,44 +1,43 @@
 "use client";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
-// 1. Define the shape of your data
-interface ExpenseData {
-  name?: string; // Optional, but usually good for Tooltips
-  value: number;
-  fill: string;
-}
-
-// 2. Apply the interface to the props
-export default function ExpenseChart({ data }: { data: ExpenseData[] }) {
-  if (!data || data.length === 0) {
+export default function ExpenseChart({ data }: { data: any[] }) {
+  if (data.length === 0) {
     return (
-      <div className="h-[300px] flex items-center justify-center border border-dashed border-slate-800 rounded-[2.5rem] opacity-30">
-        <p className="text-sm font-bold">Sin datos de gastos</p>
+      <div className="flex flex-col items-center justify-center h-full opacity-20 py-10">
+        <p className="text-sm font-bold italic">Sin gastos registrados</p>
       </div>
     );
   }
 
   return (
-    <div className="h-[300px] w-full">
+    <div className="h-[250px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={data}
-            innerRadius={80}
-            outerRadius={100}
-            paddingAngle={5}
+            innerRadius={70}
+            outerRadius={90}
+            paddingAngle={8}
             dataKey="value"
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.fill} stroke="transparent" />
             ))}
           </Pie>
-          <Tooltip 
-            contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }}
-            itemStyle={{ color: '#fff', fontWeight: 'bold' }}
+          <Tooltip
+            contentStyle={{ 
+              backgroundColor: "#0f172a", 
+              border: "1px solid #1e293b", 
+              borderRadius: "16px",
+              fontSize: "12px",
+              fontWeight: "bold"
+            }}
+            itemStyle={{ color: "#fff" }}
+            cursor={{ fill: "transparent" }}
           />
         </PieChart>
       </ResponsiveContainer>
     </div>
   );
-}
+} 
