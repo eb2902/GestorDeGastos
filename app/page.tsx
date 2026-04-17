@@ -5,10 +5,18 @@ import {
 
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation'; // Importante para la seguridad
 import LogoutButton from "@/components/auth/LogoutButton";
 import AddTransactionModal from "@/components/AddTransactionModal";
 import { DynamicIcon } from "@/components/DynamicIcon";
+import ExpenseChart from "@/components/ExpenseChart";
 
+// Interfaz para el gráfico
+interface ChartDataItem {
+  name: string;
+  value: number;
+  fill: string;
+}
 
 export default async function HomePage() {
   const cookieStore = await cookies(); 
@@ -23,21 +31,47 @@ export default async function HomePage() {
     }
   );
 
-  // SECURE AUTH: Usando getUser() para verificar la sesión en el servidor
+  // 1. SEGURIDAD: Verificar usuario y redirigir si no hay sesión activa
   const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    redirect('/login');
+  }
 
-  // Fetch de transacciones con Join a categorías
+  // 2. OBTENER DATOS
   const { data: transactions } = await supabase
     .from('transactions')
     .select('*, categories(name, icon, color)')
     .order('date', { ascending: false });
 
-  // Cálculos de balance
+  // 3. CÁLCULOS DE BALANCE
   const totalIncome = transactions?.filter(tx => tx.amount > 0)
     .reduce((acc, tx) => acc + Number(tx.amount), 0) || 0;
+  
   const totalExpense = transactions?.filter(tx => tx.amount < 0)
     .reduce((acc, tx) => acc + Math.abs(Number(tx.amount)), 0) || 0;
+  
   const balance = totalIncome - totalExpense;
+
+  // 4. LÓGICA DE AGRUPACIÓN PARA EL GRÁFICO (CORREGIDA PARA TS)
+  const chartData = (transactions || [])
+    .filter(tx => tx.amount < 0)
+    .reduce((acc: ChartDataItem[], tx) => {
+      const categoryName = tx.categories?.name || 'Otros';
+      const existing = acc.find((item) => item.name === categoryName);
+      
+      if (existing) {
+        existing.value += Math.abs(Number(tx.amount));
+      } else {
+        acc.push({ 
+          name: categoryName, 
+          value: Math.abs(Number(tx.amount)), 
+          fill: tx.categories?.color || '#94a3b8' 
+        });
+      }
+      return acc;
+    }, [])
+    .sort((a, b) => b.value - a.value);
 
   return (
     <div className="flex min-h-screen bg-[#020617] text-white font-sans">
@@ -62,7 +96,7 @@ export default async function HomePage() {
           <div className="px-4 py-3 bg-slate-900/50 rounded-2xl border border-slate-800/50">
             <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1">Sesión Iniciada</p>
             <p className="text-xs font-bold truncate opacity-80">
-              {user?.email || "usuario@app.com"}
+              {user.email}
             </p>
           </div>
           <LogoutButton />
@@ -76,9 +110,9 @@ export default async function HomePage() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Resumen de Balance */}
+          {/* Tarjeta de Balance */}
           <section className="md:col-span-2">
-            <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden text-white">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden text-white h-full">
               <p className="text-blue-100/70 text-sm font-medium uppercase tracking-wider">Balance total</p>
               <h2 className="text-6xl font-bold mt-3 tracking-tighter tabular-nums">
                 <span className="text-3xl opacity-60 mr-1">$</span>
@@ -101,14 +135,23 @@ export default async function HomePage() {
             </div>
           </section>
 
-          {/* Actividad Reciente Dinámica */}
-          <section className="md:col-span-3 mt-10">
+          {/* Gráfico */}
+          <section className="md:col-span-1">
+            <div className="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] h-full flex flex-col">
+              <h3 className="text-lg font-bold mb-6 text-center md:text-left">Distribución de Gastos</h3>
+              <div className="flex-1 flex items-center justify-center">
+                <ExpenseChart data={chartData} />
+              </div>
+            </div>
+          </section>
+
+          {/* Lista de Transacciones */}
+          <section className="md:col-span-3 mt-2">
             <h2 className="text-xl font-bold mb-6">Actividad reciente</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {transactions?.map((tx) => (
                 <div key={tx.id} className="flex items-center justify-between p-5 rounded-3xl bg-slate-900 border border-slate-800 hover:border-blue-500/30 transition-all">
                   <div className="flex items-center gap-4">
-                    {/* Contenedor de icono con color de categoría dinámico */}
                     <div 
                       className="p-3 rounded-2xl" 
                       style={{ 
