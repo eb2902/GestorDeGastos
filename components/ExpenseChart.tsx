@@ -1,7 +1,19 @@
 "use client";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
-export default function ExpenseChart({ data }: { data: any[] }) {
+// 1. Define a clear interface for your data structure
+interface ExpenseData {
+  name: string; // Usually needed for tooltips/legends
+  value: number;
+  fill: string;
+}
+
+// 2. Apply the interface to the props
+interface ExpenseChartProps {
+  data: ExpenseData[];
+}
+
+export default function ExpenseChart({ data }: ExpenseChartProps) {
   if (data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full opacity-20 py-10">
@@ -22,7 +34,11 @@ export default function ExpenseChart({ data }: { data: any[] }) {
             dataKey="value"
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.fill} stroke="transparent" />
+              <Cell 
+                key={`cell-${index}`} 
+                fill={entry.fill} 
+                stroke="transparent" 
+              />
             ))}
           </Pie>
           <Tooltip
@@ -40,4 +56,4 @@ export default function ExpenseChart({ data }: { data: any[] }) {
       </ResponsiveContainer>
     </div>
   );
-} 
+}
