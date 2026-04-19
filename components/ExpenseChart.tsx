@@ -13,7 +13,20 @@ interface ExpenseChartProps {
   data: ExpenseData[];
 }
 
+import { useEffect, useState } from "react";
+
 export default function ExpenseChart({ data }: ExpenseChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsMounted(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!isMounted) {
+    return <div className="h-[250px] w-full flex items-center justify-center opacity-20"><p className="text-sm font-bold italic">Cargando gráfico...</p></div>;
+  }
+
   if (data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full opacity-20 py-10">

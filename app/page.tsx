@@ -9,14 +9,9 @@ import { redirect } from 'next/navigation';
 import LogoutButton from "@/components/auth/LogoutButton";
 import AddTransactionModal from "@/components/AddTransactionModal";
 import { DynamicIcon } from "@/components/DynamicIcon";
-import ExpenseChart from "@/components/ExpenseChart";
 import TimeFilters from "@/components/TimeFilters";
-
-interface ChartDataItem {
-  name: string;
-  value: number;
-  fill: string;
-}
+import { calculateDashboardMetrics } from "@/utils/calculations";
+import ExpenseChart from "@/components/ExpenseChart";
 
 // Función de utilidad para calcular los rangos de fecha
 const getFilterDates = (range: string) => {
@@ -61,42 +56,20 @@ export default async function HomePage({
   }
 
   // Consulta filtrada por fecha
-  const { data: transactions } = await supabase
+  const { data: transactions, error } = await supabase
     .from('transactions')
     .select('*, categories(name, icon, color)')
     .gte('date', start)
     .lte('date', end)
     .order('date', { ascending: false });
 
-  // Cálculos de métricas
-  const totalIncome = transactions?.filter(tx => tx.amount > 0)
-    .reduce((acc, tx) => acc + Number(tx.amount), 0) || 0;
+  if (error) {
+    console.error("Error fetching transactions:", error);
+    // Optionally throw an error here to be caught by an error.tsx boundary
+  }
 
-  const totalExpense = transactions?.filter(tx => tx.amount < 0)
-    .reduce((acc, tx) => acc + Math.abs(Number(tx.amount)), 0) || 0;
-
-  const balance = totalIncome - totalExpense;
-
-  // Preparación de datos para el gráfico
-  const chartData: ChartDataItem[] = (transactions || [])
-    .filter(tx => tx.amount < 0)
-    .reduce((acc: ChartDataItem[], tx) => {
-      const categoryName = tx.categories?.name || 'Otros';
-      const amountValue = Math.abs(Number(tx.amount));
-      const existing = acc.find((item) => item.name === categoryName);
-
-      if (existing) {
-        existing.value += amountValue;
-      } else {
-        acc.push({
-          name: categoryName,
-          value: amountValue,
-          fill: tx.categories?.color || '#94a3b8'
-        });
-      }
-      return acc;
-    }, [])
-    .sort((a, b) => b.value - a.value);
+  // Cálculos de métricas extraídos a utils/calculations.ts
+  const { totalIncome, totalExpense, balance, chartData } = calculateDashboardMetrics(transactions);
 
   // Etiqueta de texto para el rango actual
   const rangeLabel = range === '7D' ? 'últimos 7 días' : range === '1M' ? 'este mes' : 'este año';
