@@ -2,6 +2,7 @@ import {
   ArrowUpCircle, ArrowDownCircle, Wallet,
   LayoutDashboard, History, Settings, PieChart
 } from "lucide-react";
+import Link from "next/link";
 
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
@@ -87,10 +88,10 @@ export default async function HomePage({
         </div>
 
         <nav className="space-y-1.5 flex-1">
-          <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" active />
-          <NavItem icon={<History size={20} />} label="Transacciones" />
-          <NavItem icon={<PieChart size={20} />} label="Estadísticas" />
-          <NavItem icon={<Settings size={20} />} label="Configuración" />
+          <NavItem href="/" icon={<LayoutDashboard size={20} />} label="Dashboard" active />
+          <NavItem href="/transactions" icon={<History size={20} />} label="Transacciones" />
+          <NavItem href="#" icon={<PieChart size={20} />} label="Estadísticas" />
+          <NavItem href="#" icon={<Settings size={20} />} label="Configuración" />
         </nav>
 
         <div className="pt-6 mt-6 border-t border-slate-800/50 space-y-4">
@@ -220,14 +221,16 @@ export default async function HomePage({
   );
 }
 
-function NavItem({ icon, label, active = false }: { icon: React.ReactNode, label: string, active?: boolean }) {
+function NavItem({ icon, label, href, active = false }: { icon: React.ReactNode, label: string, href: string, active?: boolean }) {
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all ${active
+    <Link href={href}>
+      <div className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all ${active
         ? 'bg-blue-600/10 text-blue-500'
         : 'opacity-40 hover:opacity-100 hover:bg-slate-800/50'
-      }`}>
-      {icon}
-      <span className="font-bold text-sm">{label}</span>
-    </div>
+        }`}>
+        {icon}
+        <span className="font-bold text-sm">{label}</span>
+      </div>
+    </Link>
   );
 }
