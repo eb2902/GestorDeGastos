@@ -35,7 +35,7 @@ export default async function ProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Lado Izquierdo: Resumen Rápido */}
         <div className="md:col-span-1 space-y-6">
-          <div className="bg-slate-900/40 border border-slate-800 p-8 rounded-[2.5rem] flex flex-col items-center text-center">
+          <div className="bg-slate-900/40 border border-slate-800 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] flex flex-col items-center text-center">
             <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-3xl font-black text-white mb-4 shadow-xl shadow-blue-500/20">
               {fullName.charAt(0).toUpperCase()}
             </div>
@@ -56,7 +56,7 @@ export default async function ProfilePage() {
             </div>
           </div>
 
-          <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-[2rem] space-y-4">
+          <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl md:rounded-[2rem] space-y-4">
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
               <Shield size={14} /> Seguridad
             </h3>
@@ -66,7 +66,7 @@ export default async function ProfilePage() {
 
         {/* Lado Derecho: Configuración Detallada */}
         <div className="md:col-span-2 space-y-8">
-          <section className="bg-slate-900/40 border border-slate-800 p-8 rounded-[2.5rem]">
+          <section className="bg-slate-900/40 border border-slate-800 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem]">
             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
               <Coins size={20} className="text-blue-500" /> Preferencias y Datos
             </h3>
@@ -79,7 +79,7 @@ export default async function ProfilePage() {
             />
           </section>
 
-          <section className="bg-red-500/5 border border-red-500/20 p-8 rounded-[2.5rem]">
+          <section className="bg-red-500/5 border border-red-500/20 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem]">
             <h3 className="text-lg font-bold text-red-500 mb-2 flex items-center gap-2">
               <Trash2 size={20} /> Zona de Peligro
             </h3>

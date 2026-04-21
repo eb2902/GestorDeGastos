@@ -10,7 +10,7 @@ export default async function Sidebar() {
   if (!user) return null;
 
   return (
-    <aside className="flex w-64 flex-col border-r border-slate-800/50 p-8 sticky top-0 h-screen bg-[#020617] z-40">
+    <div className="flex flex-col h-full p-6 lg:p-8 bg-[#020617] overflow-y-auto">
       <div className="flex items-center gap-3 mb-12">
         <div className="bg-blue-600 p-2.5 rounded-2xl shadow-xl shadow-blue-500/20 rotate-3 group-hover:rotate-0 transition-transform">
           <Wallet className="text-white" size={24} />
@@ -33,7 +33,7 @@ export default async function Sidebar() {
         </div>
         <LogoutButton />
       </div>
-    </aside>
+    </div>
   );
 }
 

@@ -73,9 +73,9 @@ export default async function HomePage({
 
   return (
     <div className="max-w-6xl mx-auto pb-20">
-      <header className="flex justify-between items-center mb-10">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white flex items-center gap-3">
             <span className="p-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/20">
               <Wallet size={24} />
             </span>
@@ -83,16 +83,16 @@ export default async function HomePage({
           </h1>
           <p className="text-sm text-slate-500 font-medium mt-1">Gestiona tus finanzas con precisión</p>
         </div>
-        <div className="flex items-center gap-4 bg-slate-900/50 p-1.5 rounded-2xl border border-slate-800">
+        <div className="flex items-center gap-2 md:gap-4 bg-slate-900/50 p-1.5 rounded-2xl border border-slate-800 w-full md:w-auto justify-between md:justify-start">
           <TimeFilters />
-          <div className="w-px h-6 bg-slate-800 mx-1" />
+          <div className="hidden md:block w-px h-6 bg-slate-800 mx-1" />
           <AddTransactionModal />
         </div>
       </header>
 
       {/* SECCIÓN SUPERIOR: Balance Principal */}
       <section className="mb-12">
-        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 p-12 rounded-[3rem] shadow-2xl relative overflow-hidden text-white border border-white/10 group">
+        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] shadow-2xl relative overflow-hidden text-white border border-white/10 group">
           {/* Decoración de fondo */}
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-700" />
           <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl" />
@@ -102,25 +102,25 @@ export default async function HomePage({
               <span className="text-[10px] font-black uppercase tracking-widest text-blue-100/60 mb-2">
                 Balance disponible • {rangeLabel}
               </span>
-              <h2 className="text-7xl font-black tracking-tighter tabular-nums flex items-baseline">
-                <span className="text-2xl opacity-50 mr-2">{currency === 'USD' ? '$' : 'AR$'}</span>
+              <h2 className="text-4xl md:text-7xl font-black tracking-tighter tabular-nums flex items-baseline">
+                <span className="text-xl md:text-2xl opacity-50 mr-2">{currency === 'USD' ? '$' : 'AR$'}</span>
                 {balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h2>
             </div>
 
-            <div className="flex gap-8 md:gap-12 bg-black/20 backdrop-blur-md p-6 rounded-3xl border border-white/5">
+            <div className="flex gap-4 md:gap-12 bg-black/20 backdrop-blur-md p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/5 justify-between md:justify-start">
               <div>
-                <span className="flex items-center gap-2 text-[10px] text-blue-100/60 mb-2 font-black uppercase tracking-widest">
+                <span className="flex items-center gap-2 text-[10px] text-blue-100/60 mb-1 md:mb-2 font-black uppercase tracking-widest">
                   <ArrowUpCircle size={12} className="text-green-400" /> Ingresos
                 </span>
-                <span className="text-2xl font-bold block">{formatCurrency(totalIncome, currency)}</span>
+                <span className="text-xl md:text-2xl font-bold block">{formatCurrency(totalIncome, currency)}</span>
               </div>
-              <div className="w-px h-10 bg-white/10 self-center" />
+              <div className="w-px h-8 md:h-10 bg-white/10 self-center" />
               <div>
-                <span className="flex items-center gap-2 text-[10px] text-blue-100/60 mb-2 font-black uppercase tracking-widest">
+                <span className="flex items-center gap-2 text-[10px] text-blue-100/60 mb-1 md:mb-2 font-black uppercase tracking-widest">
                   <ArrowDownCircle size={12} className="text-red-400" /> Gastos
                 </span>
-                <span className="text-2xl font-bold block">{formatCurrency(totalExpense, currency)}</span>
+                <span className="text-xl md:text-2xl font-bold block">{formatCurrency(totalExpense, currency)}</span>
               </div>
             </div>
           </div>

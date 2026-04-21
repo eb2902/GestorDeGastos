@@ -55,21 +55,21 @@ export default async function TransactionsPage({
 
             {/* 2. Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-[2rem]">
+                <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl md:rounded-[2rem]">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1 text-slate-400">Balance Filtrado</p>
                     <h3 className={`text-2xl font-bold tabular-nums ${totalBalance >= 0 ? 'text-white' : 'text-red-400'}`}>
                         {formatCurrency(totalBalance, currency)}
                     </h3>
                 </div>
 
-                <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-[2rem]">
+                <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl md:rounded-[2rem]">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1 text-slate-400">Total Gastos</p>
                     <h3 className="text-2xl font-bold tabular-nums text-white">
                         {formatCurrency(Math.abs(totalExpenses), currency)}
                     </h3>
                 </div>
 
-                <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-[2rem]">
+                <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl md:rounded-[2rem]">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1 text-slate-400">Total Ingresos</p>
                     <h3 className="text-2xl font-bold tabular-nums text-green-500">
                         {formatCurrency(totalIncomes, currency)}

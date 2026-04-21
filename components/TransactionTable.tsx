@@ -73,8 +73,9 @@ export default function TransactionTable({ transactions, currency = "USD" }: Tra
   };
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800 rounded-[2.5rem] overflow-hidden">
-      <table className="w-full text-left border-collapse">
+    <div className="bg-transparent lg:bg-slate-900/40 lg:border lg:border-slate-800 lg:rounded-[2.5rem] overflow-hidden">
+      {/* Desktop Table */}
+      <table className="hidden lg:table w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-slate-800">
             <th className="p-6 text-[10px] font-black uppercase tracking-widest opacity-30 text-slate-400">Fecha</th>
@@ -113,8 +114,8 @@ export default function TransactionTable({ transactions, currency = "USD" }: Tra
                 <td className="p-6">
                   <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
                     tx.amount > 0 
-                      ? 'bg-green-500/10 text-green-500' // Verde para ingresos
-                      : 'bg-slate-800 text-slate-400'    // Gris oscuro para egresos
+                      ? 'bg-green-500/10 text-green-500' 
+                      : 'bg-slate-800 text-slate-400'    
                   }`}>
                     {tx.amount > 0 ? 'Ingreso' : 'Egreso'}
                   </span>
@@ -152,6 +153,69 @@ export default function TransactionTable({ transactions, currency = "USD" }: Tra
           )}
         </tbody>
       </table>
+
+      {/* Mobile List */}
+      <div className="lg:hidden space-y-4">
+        {transactions.length > 0 ? (
+          transactions.map((tx) => (
+            <div key={tx.id} className="bg-slate-900/40 border border-slate-800 p-5 rounded-[2rem] space-y-4">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="p-2.5 rounded-xl"
+                    style={{
+                      backgroundColor: `${tx.categories?.color || '#1e293b'}20`,
+                      color: tx.categories?.color || '#94a3b8'
+                    }}
+                  >
+                    <DynamicIcon name={tx.categories?.icon} size={20} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white leading-tight">{tx.description}</h4>
+                    <p className="text-[10px] font-black uppercase tracking-tight opacity-40 text-slate-400">{tx.categories?.name}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={`font-black text-xl tabular-nums ${tx.amount > 0 ? 'text-green-500' : 'text-white'}`}>
+                    {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount, currency)}
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-bold mt-1">
+                    {new Date(tx.date).toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center pt-4 border-t border-slate-800/50">
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
+                  tx.amount > 0 
+                    ? 'bg-green-500/10 text-green-500' 
+                    : 'bg-slate-800 text-slate-400'    
+                }`}>
+                  {tx.amount > 0 ? 'Ingreso' : 'Egreso'}
+                </span>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setEditingTransaction(tx)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 text-blue-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                  >
+                    <Pencil size={14} /> Editar
+                  </button>
+                  <button 
+                    onClick={() => setDeletingTransactionId(tx.id)}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                  >
+                    <Trash2 size={14} /> Borrar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="p-10 text-center text-slate-500 text-sm bg-slate-900/20 rounded-[2rem] border border-dashed border-slate-800">
+            No se encontraron movimientos.
+          </div>
+        )}
+      </div>
 
       {/* Edit Modal */}
       <AddTransactionModal 
