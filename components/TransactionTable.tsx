@@ -27,12 +27,13 @@ interface TransactionTableProps {
   transactions: Transaction[];
 }
 
+import { deleteTransactionAction } from "@/app/actions/transactions";
+
 export default function TransactionTable({ transactions }: TransactionTableProps) {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTransactionId, setDeletingTransactionId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  const supabase = createClient();
   const router = useRouter();
 
   const handleDelete = async () => {
@@ -40,12 +41,11 @@ export default function TransactionTable({ transactions }: TransactionTableProps
     
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from("transactions")
-        .delete()
-        .eq("id", deletingTransactionId);
+      const result = await deleteTransactionAction(deletingTransactionId);
 
-      if (error) throw error;
+      if (!result.success) {
+        throw new Error(result.error);
+      }
       
       setDeletingTransactionId(null);
       router.refresh();

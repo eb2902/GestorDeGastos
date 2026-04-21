@@ -2,6 +2,9 @@ import { createClient } from "@/utils/supabase/server";
 import TransactionSearch from "@/components/TransactionSearch";
 import TransactionTable from "@/components/TransactionTable";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function TransactionsPage({
     searchParams,
 }: {

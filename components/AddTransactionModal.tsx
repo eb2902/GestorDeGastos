@@ -28,6 +28,8 @@ interface AddTransactionModalProps {
   showTrigger?: boolean;
 }
 
+import { saveTransaction } from "@/app/actions/transactions";
+
 export default function AddTransactionModal({ 
   transactionToEdit = null, 
   isOpen: controlledIsOpen, 
@@ -130,11 +132,11 @@ export default function AddTransactionModal({
   };
 
   const handleClose = () => {
+    resetForm();
     if (controlledOnClose) {
       controlledOnClose();
     } else {
       setInternalIsOpen(false);
-      resetForm();
     }
   };
 
@@ -161,26 +163,18 @@ export default function AddTransactionModal({
         description,
         amount: type === "expense" ? -Math.abs(Number(amount)) : Math.abs(Number(amount)),
         category_id: categoryId,
-        date: new Date(date).toISOString(),
+        date: date, // Usamos el string YYYY-MM-DD directamente
       };
 
-      let error;
-      if (transactionToEdit) {
-        const { error: updateError } = await supabase
-          .from("transactions")
-          .update(transactionData)
-          .eq("id", transactionToEdit.id);
-        error = updateError;
-      } else {
-        const { error: insertError } = await supabase
-          .from("transactions")
-          .insert(transactionData);
-        error = insertError;
+      const result = await saveTransaction(transactionData, transactionToEdit?.id);
+
+      if (!result.success) {
+        throw new Error(result.error);
       }
 
-      if (error) throw error;
-
       handleClose();
+      // No need for router.refresh() if using revalidatePath in server action, 
+      // but it doesn't hurt to trigger a client-side update too.
       router.refresh();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Error al guardar";
