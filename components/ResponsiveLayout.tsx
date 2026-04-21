@@ -11,11 +11,13 @@ interface ResponsiveLayoutProps {
 export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const [prevPathname, setPrevPathname] = useState(pathname);
 
-  // Cerrar el sidebar cuando cambia la ruta
-  useEffect(() => {
+  // Cerrar el sidebar cuando cambia la ruta (evitando useEffect para prevenir cascading renders)
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setIsSidebarOpen(false);
-  }, [pathname]);
+  }
 
   // Prevenir scroll cuando el menú está abierto en móvil
   useEffect(() => {

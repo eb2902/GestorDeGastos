@@ -1,7 +1,5 @@
 "use client";
 import { Menu, X, Wallet } from "lucide-react";
-import { useState, useEffect } from "react";
-import Link from "next/link";
 
 interface MobileHeaderProps {
   onOpenSidebar: () => void;
