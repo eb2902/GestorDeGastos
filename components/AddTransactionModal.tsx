@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { X, Plus, ArrowDownCircle, ArrowUpCircle, ChevronDown, Calendar } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { DynamicIcon } from "./DynamicIcon"; 
 import { getTodayISO } from "@/utils/formatters";
 
@@ -170,6 +171,12 @@ export default function AddTransactionModal({
 
       if (!result.success) {
         throw new Error(result.error);
+      }
+      
+      if (transactionToEdit) {
+        toast.success("Transacción editada con éxito");
+      } else {
+        toast.success("Transacción guardada correctamente");
       }
 
       handleClose();

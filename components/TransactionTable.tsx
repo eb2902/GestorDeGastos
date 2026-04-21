@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { DynamicIcon } from "./DynamicIcon";
 import AddTransactionModal from "./AddTransactionModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
@@ -35,6 +35,18 @@ export default function TransactionTable({ transactions }: TransactionTableProps
   const [isDeleting, setIsDeleting] = useState(false);
   
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const query = searchParams.get("query");
+
+  // Notificación de búsqueda sin resultados
+  useEffect(() => {
+    if (query && transactions.length === 0) {
+      toast.info(`Sin resultados para "${query}"`, {
+        description: "Intenta con otros términos de búsqueda.",
+        duration: 4000,
+      });
+    }
+  }, [query, transactions.length]);
 
   const handleDelete = async () => {
     if (!deletingTransactionId) return;
@@ -47,11 +59,12 @@ export default function TransactionTable({ transactions }: TransactionTableProps
         throw new Error(result.error);
       }
       
+      toast.success("Transacción eliminada correctamente");
       setDeletingTransactionId(null);
       router.refresh();
     } catch (error) {
       console.error("Error deleting transaction:", error);
-      alert("Error al eliminar la transacción");
+      toast.error("Error al eliminar la transacción");
     } finally {
       setIsDeleting(false);
     }
@@ -96,8 +109,11 @@ export default function TransactionTable({ transactions }: TransactionTableProps
                   </div>
                 </td>
                 <td className="p-6">
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${tx.amount > 0 ? 'bg-green-500/10 text-green-500' : 'bg-slate-800 text-slate-400'
-                    }`}>
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
+                    tx.amount > 0 
+                      ? 'bg-green-500/10 text-green-500' // Verde para ingresos
+                      : 'bg-slate-800 text-slate-400'    // Gris oscuro para egresos
+                  }`}>
                     {tx.amount > 0 ? 'Ingreso' : 'Egreso'}
                   </span>
                 </td>

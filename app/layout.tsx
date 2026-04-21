@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Gestión de finanzas personales con Next.js y Supabase",
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,6 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full bg-[#020617] text-white`}
       >
         {children}
+        <Toaster theme="dark" position="bottom-right" richColors closeButton />
       </body>
     </html>
   );

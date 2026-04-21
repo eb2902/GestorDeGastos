@@ -3,7 +3,15 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export async function saveTransaction(data: any, id?: string) {
+export interface TransactionData {
+  user_id: string;
+  description: string;
+  amount: number;
+  category_id: string;
+  date: string;
+}
+
+export async function saveTransaction(data: TransactionData, id?: string) {
   const supabase = await createClient();
 
   let error;
