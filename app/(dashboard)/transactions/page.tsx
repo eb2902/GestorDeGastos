@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import TransactionSearch from "@/components/TransactionSearch";
 import TransactionTable from "@/components/TransactionTable";
+import { formatCurrency } from "@/utils/formatters";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -14,6 +15,9 @@ export default async function TransactionsPage({
     const params = await searchParams;
     const query = params?.query || "";
     const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const currency = user?.user_metadata?.currency || "USD";
 
     // Consulta a Supabase
     let request = supabase
@@ -54,27 +58,27 @@ export default async function TransactionsPage({
                 <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-[2rem]">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1 text-slate-400">Balance Filtrado</p>
                     <h3 className={`text-2xl font-bold tabular-nums ${totalBalance >= 0 ? 'text-white' : 'text-red-400'}`}>
-                        ${totalBalance.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        {formatCurrency(totalBalance, currency)}
                     </h3>
                 </div>
 
                 <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-[2rem]">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1 text-slate-400">Total Gastos</p>
                     <h3 className="text-2xl font-bold tabular-nums text-white">
-                        ${Math.abs(totalExpenses).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        {formatCurrency(Math.abs(totalExpenses), currency)}
                     </h3>
                 </div>
 
                 <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-[2rem]">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1 text-slate-400">Total Ingresos</p>
                     <h3 className="text-2xl font-bold tabular-nums text-green-500">
-                        ${totalIncomes.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        {formatCurrency(totalIncomes, currency)}
                     </h3>
                 </div>
             </div>
 
             {/* 3. Tabla (Client Component) */}
-            <TransactionTable transactions={transactions || []} />
+            <TransactionTable transactions={transactions || []} currency={currency} />
         </div>
     );
 }

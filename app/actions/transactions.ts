@@ -55,3 +55,18 @@ export async function deleteTransactionAction(id: string) {
   revalidatePath("/");
   return { success: true };
 }
+
+export async function getUserStats() {
+  const supabase = await createClient();
+  
+  const { count, error } = await supabase
+    .from("transactions")
+    .select("*", { count: "exact", head: true });
+
+  if (error) {
+    console.error("Error fetching user stats:", error);
+    return { count: 0 };
+  }
+
+  return { count: count || 0 };
+}

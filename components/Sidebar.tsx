@@ -22,7 +22,7 @@ export default async function Sidebar() {
         <NavItem href="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
         <NavItem href="/transactions" icon={<History size={20} />} label="Transacciones" />
         <NavItem href="#" icon={<PieChart size={20} />} label="Estadísticas" />
-        <NavItem href="#" icon={<Settings size={20} />} label="Configuración" />
+        <NavItem href="/profile" icon={<Settings size={20} />} label="Mi Perfil" />
       </nav>
 
       <div className="pt-8 mt-auto space-y-6">

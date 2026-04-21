@@ -54,6 +54,8 @@ export default async function HomePage({
     redirect('/login');
   }
 
+  const currency = user.user_metadata?.currency || 'USD';
+
   // Consulta filtrada por fecha
   const { data: transactions, error } = await supabase
     .from('transactions')
@@ -100,8 +102,8 @@ export default async function HomePage({
               <span className="text-[10px] font-black uppercase tracking-widest text-blue-100/60 mb-2">
                 Balance disponible • {rangeLabel}
               </span>
-              <h2 className="text-7xl font-black tracking-tighter tabular-nums flex items-start">
-                <span className="text-4xl opacity-50 mt-2 mr-1">$</span>
+              <h2 className="text-7xl font-black tracking-tighter tabular-nums flex items-baseline">
+                <span className="text-2xl opacity-50 mr-2">{currency === 'USD' ? '$' : 'AR$'}</span>
                 {balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h2>
             </div>
@@ -111,14 +113,14 @@ export default async function HomePage({
                 <span className="flex items-center gap-2 text-[10px] text-blue-100/60 mb-2 font-black uppercase tracking-widest">
                   <ArrowUpCircle size={12} className="text-green-400" /> Ingresos
                 </span>
-                <span className="text-2xl font-bold block">{formatCurrency(totalIncome)}</span>
+                <span className="text-2xl font-bold block">{formatCurrency(totalIncome, currency)}</span>
               </div>
               <div className="w-px h-10 bg-white/10 self-center" />
               <div>
                 <span className="flex items-center gap-2 text-[10px] text-blue-100/60 mb-2 font-black uppercase tracking-widest">
                   <ArrowDownCircle size={12} className="text-red-400" /> Gastos
                 </span>
-                <span className="text-2xl font-bold block">{formatCurrency(totalExpense)}</span>
+                <span className="text-2xl font-bold block">{formatCurrency(totalExpense, currency)}</span>
               </div>
             </div>
           </div>
@@ -165,7 +167,7 @@ export default async function HomePage({
                 </div>
                 <div className="text-right">
                   <p className={`font-black text-lg tabular-nums ${tx.amount > 0 ? 'text-green-500' : 'text-white'}`}>
-                    {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount).replace('$', '')}
+                    {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount, currency).replace('$', '').replace('AR$', '')}
                   </p>
                 </div>
               </div>
@@ -196,7 +198,7 @@ export default async function HomePage({
                   {/* Centro del Donut (opcional, si el chart es donut) */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span className="text-[10px] font-black opacity-20 uppercase">Total</span>
-                    <span className="text-lg font-black text-white">${totalExpense.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                    <span className="text-lg font-black text-white">{formatCurrency(totalExpense, currency)}</span>
                   </div>
                 </>
               ) : (
@@ -218,7 +220,7 @@ export default async function HomePage({
                       <span className="text-slate-400 font-bold group-hover:text-slate-200 transition-colors">{item.name}</span>
                     </div>
                     <span className="font-black text-slate-200 tabular-nums">
-                      {formatCurrency(item.value)}
+                      {formatCurrency(item.value, currency)}
                     </span>
                   </div>
                 ))}
