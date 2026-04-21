@@ -39,17 +39,32 @@
     color: var(--foreground);
     /* tnum asegura que los números no "salten" al cambiar */
     font-feature-settings: "cv02", "cv03", "tnum"; 
-    @apply antialiased;
+    /* Standard CSS equivalent of @apply antialiased */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   * {
-    @apply border-[var(--border)] transition-colors duration-200;
+    border-color: var(--border);
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white/5 dark:bg-slate-900/40 backdrop-blur-md border border-white/10 shadow-sm;
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .glass-card {
+      background-color: rgba(15, 23, 42, 0.4); /* slate-900/40 */
+    }
   }
   
   .balance-gradient {
@@ -71,5 +86,19 @@
   /* Opcional: Color de fondo de la barra en hover para mejor UX */
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #334155;
+  }
+
+  /* Estilos para inputs de fecha en navegadores modernos */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
   }
 }

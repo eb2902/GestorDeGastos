@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
-import { DynamicIcon } from "@/components/DynamicIcon";
 import TransactionSearch from "@/components/TransactionSearch";
+import TransactionTable from "@/components/TransactionTable";
 
 export default async function TransactionsPage({
     searchParams,
@@ -8,7 +8,8 @@ export default async function TransactionsPage({
     searchParams: { query?: string };
 }) {
     // Manejo de búsqueda para Next.js 15+
-    const query = (await searchParams)?.query || "";
+    const params = await searchParams;
+    const query = params?.query || "";
     const supabase = await createClient();
 
     // Consulta a Supabase
@@ -69,65 +70,8 @@ export default async function TransactionsPage({
                 </div>
             </div>
 
-            {/* 3. Tabla Mejorada */}
-            <div className="bg-slate-900/40 border border-slate-800 rounded-[2.5rem] overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="border-b border-slate-800">
-                            <th className="p-6 text-[10px] font-black uppercase tracking-widest opacity-30 text-slate-400">Fecha</th>
-                            <th className="p-6 text-[10px] font-black uppercase tracking-widest opacity-30 text-slate-400">Detalle</th>
-                            <th className="p-6 text-[10px] font-black uppercase tracking-widest opacity-30 text-slate-400">Tipo</th>
-                            <th className="p-6 text-right text-[10px] font-black uppercase tracking-widest opacity-30 text-slate-400">Monto</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {transactions && transactions.length > 0 ? (
-                            transactions.map((tx) => (
-                                <tr key={tx.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-all group">
-                                    <td className="p-6">
-                                        <span className="text-sm text-slate-400 font-medium">
-                                            {new Date(tx.date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
-                                        </span>
-                                    </td>
-                                    <td className="p-6">
-                                        <div className="flex items-center gap-3">
-                                            <div
-                                                className="p-2 rounded-xl"
-                                                style={{
-                                                    backgroundColor: `${tx.categories?.color || '#1e293b'}20`,
-                                                    color: tx.categories?.color || '#94a3b8'
-                                                }}
-                                            >
-                                                <DynamicIcon name={tx.categories?.icon} size={16} />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-white leading-tight mb-0.5">{tx.description}</span>
-                                                <span className="text-[10px] font-black uppercase tracking-tight opacity-40 text-slate-400">{tx.categories?.name}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="p-6">
-                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${tx.amount > 0 ? 'bg-green-500/10 text-green-500' : 'bg-slate-800 text-slate-400'
-                                            }`}>
-                                            {tx.amount > 0 ? 'Ingreso' : 'Egreso'}
-                                        </span>
-                                    </td>
-                                    <td className={`p-6 text-right font-black tabular-nums text-lg ${tx.amount > 0 ? 'text-green-500' : 'text-white'}`}>
-                                        {tx.amount > 0 ? '+' : ''}
-                                        {tx.amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={4} className="p-20 text-center text-slate-500 text-sm">
-                                    No se encontraron movimientos.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            {/* 3. Tabla (Client Component) */}
+            <TransactionTable transactions={transactions || []} />
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import {
-  ArrowUpCircle, ArrowDownCircle
+  ArrowUpCircle, ArrowDownCircle, Wallet, History as HistoryIcon, PieChart as PieChartIcon
 } from "lucide-react";
 
 import { createServerClient } from '@supabase/ssr';
@@ -10,6 +10,7 @@ import { DynamicIcon } from "@/components/DynamicIcon";
 import TimeFilters from "@/components/TimeFilters";
 import { calculateDashboardMetrics } from "@/utils/calculations";
 import ExpenseChart from "@/components/ExpenseChart";
+import { formatCurrency, formatDate } from "@/utils/formatters";
 
 // Función de utilidad para calcular los rangos de fecha
 const getFilterDates = (range: string) => {
@@ -69,107 +70,155 @@ export default async function HomePage({
   const rangeLabel = range === '7D' ? 'últimos 7 días' : range === '1M' ? 'este mes' : 'este año';
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto pb-20">
       <header className="flex justify-between items-center mb-10">
-        <h1 className="text-2xl font-bold tracking-tight">Panel de Control</h1>
-        <div className="flex items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
+            <span className="p-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/20">
+              <Wallet size={24} />
+            </span>
+            Panel de Control
+          </h1>
+          <p className="text-sm text-slate-500 font-medium mt-1">Gestiona tus finanzas con precisión</p>
+        </div>
+        <div className="flex items-center gap-4 bg-slate-900/50 p-1.5 rounded-2xl border border-slate-800">
           <TimeFilters />
+          <div className="w-px h-6 bg-slate-800 mx-1" />
           <AddTransactionModal />
         </div>
       </header>
 
       {/* SECCIÓN SUPERIOR: Balance Principal */}
-      <section className="mb-10">
-        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden text-white">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-widest text-blue-100/50">
-              Balance {rangeLabel}
-            </span>
-            <h2 className="text-6xl font-bold mt-2 tracking-tighter tabular-nums">
-              <span className="text-3xl opacity-60 mr-1">$</span>
-              {balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </h2>
-          </div>
+      <section className="mb-12">
+        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 p-12 rounded-[3rem] shadow-2xl relative overflow-hidden text-white border border-white/10 group">
+          {/* Decoración de fondo */}
+          <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-700" />
+          <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl" />
 
-          <div className="flex gap-10 mt-12 pt-8 border-t border-white/10">
-            <div>
-              <span className="flex items-center gap-1.5 text-xs text-blue-100/60 mb-2 font-bold">
-                <ArrowUpCircle size={14} className="text-green-400" /> INGRESOS
+          <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-widest text-blue-100/60 mb-2">
+                Balance disponible • {rangeLabel}
               </span>
-              <span className="text-2xl font-bold">${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              <h2 className="text-7xl font-black tracking-tighter tabular-nums flex items-start">
+                <span className="text-4xl opacity-50 mt-2 mr-1">$</span>
+                {balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              </h2>
             </div>
-            <div>
-              <span className="flex items-center gap-1.5 text-xs text-blue-100/60 mb-2 font-bold">
-                <ArrowDownCircle size={14} className="text-red-400" /> GASTOS
-              </span>
-              <span className="text-2xl font-bold">${totalExpense.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+
+            <div className="flex gap-8 md:gap-12 bg-black/20 backdrop-blur-md p-6 rounded-3xl border border-white/5">
+              <div>
+                <span className="flex items-center gap-2 text-[10px] text-blue-100/60 mb-2 font-black uppercase tracking-widest">
+                  <ArrowUpCircle size={12} className="text-green-400" /> Ingresos
+                </span>
+                <span className="text-2xl font-bold block">{formatCurrency(totalIncome)}</span>
+              </div>
+              <div className="w-px h-10 bg-white/10 self-center" />
+              <div>
+                <span className="flex items-center gap-2 text-[10px] text-blue-100/60 mb-2 font-black uppercase tracking-widest">
+                  <ArrowDownCircle size={12} className="text-red-400" /> Gastos
+                </span>
+                <span className="text-2xl font-bold block">{formatCurrency(totalExpense)}</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* SECCIÓN INFERIOR: Grid de 2 Columnas */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         <section className="lg:col-span-2">
-          <h2 className="text-xl font-bold mb-6">Actividad de {rangeLabel}</h2>
-          <div className="space-y-4">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              Movimientos Recientes
+              <span className="text-[10px] font-black bg-slate-800 px-2 py-1 rounded-full text-slate-500 uppercase">
+                {transactions?.length || 0}
+              </span>
+            </h2>
+          </div>
+
+          <div className="space-y-3">
             {transactions?.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between p-5 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-blue-500/30 transition-all group">
-                <div className="flex items-center gap-4">
+              <div key={tx.id} className="flex items-center justify-between p-5 rounded-[2rem] bg-slate-900/40 border border-slate-800/50 hover:bg-slate-900/80 hover:border-blue-500/30 transition-all group">
+                <div className="flex items-center gap-5">
                   <div
-                    className="p-3 rounded-2xl"
+                    className="p-3.5 rounded-2xl shadow-inner"
                     style={{
-                      backgroundColor: tx.categories?.color ? `${tx.categories.color}20` : '#1e293b',
+                      backgroundColor: tx.categories?.color ? `${tx.categories.color}15` : '#1e293b',
                       color: tx.categories?.color || '#64748b'
                     }}
                   >
-                    <DynamicIcon name={tx.categories?.icon} size={22} />
+                    <DynamicIcon name={tx.categories?.icon} size={24} />
                   </div>
                   <div>
-                    <p className="font-bold text-sm group-hover:text-blue-400 transition-colors">{tx.description}</p>
-                    <p className="text-[10px] opacity-40 font-bold uppercase tracking-widest">
-                      {tx.categories?.name || 'General'} • {new Date(tx.date).toLocaleDateString()}
-                    </p>
+                    <p className="font-bold text-base text-slate-200 group-hover:text-white transition-colors">{tx.description}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] opacity-40 font-black uppercase tracking-widest bg-slate-800/50 px-2 py-0.5 rounded text-white">
+                        {tx.categories?.name || 'General'}
+                      </span>
+                      <span className="text-slate-600 font-bold">•</span>
+                      <span className="text-[10px] text-slate-500 font-bold">
+                        {formatDate(tx.date)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <p className={`font-black tabular-nums ${tx.amount > 0 ? 'text-green-500' : 'text-white'}`}>
-                  {tx.amount > 0 ? '+' : ''}{Number(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                </p>
+                <div className="text-right">
+                  <p className={`font-black text-lg tabular-nums ${tx.amount > 0 ? 'text-green-500' : 'text-white'}`}>
+                    {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount).replace('$', '')}
+                  </p>
+                </div>
               </div>
             ))}
 
             {(!transactions || transactions.length === 0) && (
-              <div className="text-center py-20 bg-slate-900/30 rounded-[2.5rem] border border-dashed border-slate-800">
-                <p className="opacity-40 font-medium">No hay movimientos en este periodo.</p>
+              <div className="text-center py-24 bg-slate-900/20 rounded-[3rem] border border-dashed border-slate-800/50">
+                <div className="bg-slate-800/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <HistoryIcon size={24} className="text-slate-600" />
+                </div>
+                <p className="text-slate-500 font-bold">No hay movimientos en este periodo.</p>
+                <p className="text-xs text-slate-600 mt-1">Prueba cambiando los filtros o agrega uno nuevo.</p>
               </div>
             )}
           </div>
         </section>
 
         <aside className="lg:col-span-1">
-          <div className="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] sticky top-8">
-            <h3 className="text-sm font-black uppercase tracking-widest opacity-30 mb-6 text-center lg:text-left">
+          <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-800 p-8 rounded-[3rem] sticky top-8">
+            <h3 className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-8 text-center lg:text-left text-white">
               Distribución de Gastos
             </h3>
 
-            <div className="min-h-[250px] flex items-center justify-center">
+            <div className="min-h-[260px] flex items-center justify-center relative">
               {chartData.length > 0 ? (
-                <ExpenseChart data={chartData} />
+                <>
+                  <ExpenseChart data={chartData} />
+                  {/* Centro del Donut (opcional, si el chart es donut) */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-[10px] font-black opacity-20 uppercase">Total</span>
+                    <span className="text-lg font-black text-white">${totalExpense.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                  </div>
+                </>
               ) : (
-                <p className="text-xs opacity-40 italic text-center">Sin datos para graficar</p>
+                <div className="text-center">
+                  <div className="bg-slate-800/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <PieChartIcon size={20} className="text-slate-700" />
+                  </div>
+                  <p className="text-xs opacity-40 font-bold italic">Sin datos para graficar</p>
+                </div>
               )}
             </div>
 
             {chartData.length > 0 && (
-              <div className="mt-8 space-y-3">
+              <div className="mt-10 space-y-2">
                 {chartData.map((item) => (
-                  <div key={item.name} className="flex justify-between items-center text-xs p-2 rounded-xl hover:bg-slate-800/30 transition-colors">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.fill }} />
-                      <span className="opacity-70 font-medium">{item.name}</span>
+                  <div key={item.name} className="flex justify-between items-center text-xs p-3 rounded-2xl hover:bg-white/5 transition-all group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2.5 h-2.5 rounded-full shadow-lg group-hover:scale-125 transition-transform" style={{ backgroundColor: item.fill }} />
+                      <span className="text-slate-400 font-bold group-hover:text-slate-200 transition-colors">{item.name}</span>
                     </div>
-                    <span className="font-bold text-slate-200">
-                      ${item.value.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    <span className="font-black text-slate-200 tabular-nums">
+                      {formatCurrency(item.value)}
                     </span>
                   </div>
                 ))}
