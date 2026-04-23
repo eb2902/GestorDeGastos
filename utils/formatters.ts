@@ -15,6 +15,17 @@ export const formatCurrency = (amount: number, currency: string = 'USD', locale:
 };
 
 /**
+ * Formatea solo el valor numérico absoluto, sin símbolo de moneda.
+ * Útil para mostrar montos con prefijo de signo manual (+/-).
+ */
+export const formatAmount = (amount: number, locale: string = 'en-US') => {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.abs(amount));
+};
+
+/**
  * Formatea una fecha de forma legible.
  */
 export const formatDate = (dateString: string, locale: string = 'es-AR') => {

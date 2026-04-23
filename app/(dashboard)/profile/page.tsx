@@ -29,7 +29,7 @@ export default async function ProfilePage() {
 
       <header className="mb-10 animate-fade-in-up">
         <h1 className="text-4xl font-black tracking-tight text-white flex items-center gap-4">
-          <div className="p-3 bg-blue-600 rounded-2xl shadow-xl shadow-blue-500/20 ring-1 ring-white/20 group-hover:rotate-0 transition-transform">
+          <div className="p-3 bg-blue-600 rounded-2xl shadow-xl shadow-blue-500/20 ring-1 ring-white/20">
             <User size={28} className="text-white" />
           </div>
           Mi Perfil

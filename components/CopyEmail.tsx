@@ -30,7 +30,7 @@ export default function CopyEmail({ email }: CopyEmailProps) {
         {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
       </button>
       {copied && (
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-[10px] text-white rounded shadow-lg animate-bounce">
+        <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-[10px] text-white rounded shadow-lg animate-fade-in-tooltip">
           ¡Copiado!
         </span>
       )}

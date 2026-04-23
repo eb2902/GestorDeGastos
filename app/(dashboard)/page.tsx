@@ -10,7 +10,7 @@ import { DynamicIcon } from "@/components/DynamicIcon";
 import TimeFilters from "@/components/TimeFilters";
 import { calculateDashboardMetrics } from "@/utils/calculations";
 import ExpenseChart from "@/components/ExpenseChart";
-import { formatCurrency, formatDate } from "@/utils/formatters";
+import { formatCurrency, formatDate, formatAmount } from "@/utils/formatters";
 
 // Función de utilidad para calcular los rangos de fecha
 const getFilterDates = (range: string) => {
@@ -166,8 +166,10 @@ export default async function HomePage({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className={`font-black text-lg tabular-nums ${tx.amount > 0 ? 'text-green-500' : 'text-white'}`}>
-                    {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount, currency).replace('$', '').replace('AR$', '')}
+                  <p className={`font-black text-lg tabular-nums ${
+                    tx.amount > 0 ? 'text-green-500' : 'text-red-400'
+                  }`}>
+                    {tx.amount > 0 ? '+' : '-'}{formatAmount(tx.amount)}
                   </p>
                 </div>
               </div>

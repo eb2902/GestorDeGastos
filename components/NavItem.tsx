@@ -28,7 +28,7 @@ export default function NavItem({ icon, label, href }: NavItemProps) {
           {label}
         </span>
         {isActive && (
-          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)] animate-scale-in" />
         )}
       </div>
     </Link>
