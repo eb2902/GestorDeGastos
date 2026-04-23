@@ -4,8 +4,9 @@ import { X, Plus, ArrowDownCircle, ArrowUpCircle, ChevronDown, Calendar } from "
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { DynamicIcon } from "./DynamicIcon"; 
+import { DynamicIcon } from "./DynamicIcon";
 import { getTodayISO } from "@/utils/formatters";
+import { saveTransaction } from "@/app/actions/transactions";
 
 interface Category {
   id: string;
@@ -29,39 +30,37 @@ interface AddTransactionModalProps {
   showTrigger?: boolean;
 }
 
-import { saveTransaction } from "@/app/actions/transactions";
-
-export default function AddTransactionModal({ 
-  transactionToEdit = null, 
-  isOpen: controlledIsOpen, 
+export default function AddTransactionModal({
+  transactionToEdit = null,
+  isOpen: controlledIsOpen,
   onClose: controlledOnClose,
-  showTrigger = true 
+  showTrigger = true
 }: AddTransactionModalProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  
+
   // Form State
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState<"expense" | "income">("expense");
   const [categoryId, setCategoryId] = useState("");
   const [date, setDate] = useState(getTodayISO());
-  
+
   // UI State
   const [categories, setCategories] = useState<Category[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedCategoryName, setSelectedCategoryName] = useState("Seleccionar categoría");
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const [showValidation, setShowValidation] = useState(false);
-  
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
   const router = useRouter();
 
-  // Initialize form when editing or opening
+  // Cargar datos de la transacción a editar cuando se abre el modal
   useEffect(() => {
     if (isOpen) {
       if (transactionToEdit) {
@@ -80,6 +79,7 @@ export default function AddTransactionModal({
     }
   }, [isOpen, transactionToEdit]);
 
+  // Cargar categorías desde Supabase
   useEffect(() => {
     const fetchCategories = async () => {
       if (!isOpen) return;
@@ -88,10 +88,10 @@ export default function AddTransactionModal({
         .from('categories')
         .select('id, name, icon')
         .order('name', { ascending: true });
-      
+
       if (data) {
         setCategories(data);
-        // If we have a categoryId but no name/icon (e.g. from transactionToEdit), set it now
+        // Si ya hay una categoría seleccionada, actualizar nombre e ícono
         if (categoryId && (!selectedIcon || selectedCategoryName === "Seleccionar categoría")) {
           const cat = data.find(c => c.id === categoryId);
           if (cat) {
@@ -108,6 +108,7 @@ export default function AddTransactionModal({
     fetchCategories();
   }, [isOpen, supabase, categoryId, selectedIcon, selectedCategoryName]);
 
+  // Cerrar dropdown al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -144,27 +145,30 @@ export default function AddTransactionModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
-
-    // Validación básica
-    if (!categoryId) {
-      setShowValidation(true);
-      setErrorMsg("Por favor, selecciona una categoría");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      // Verificar autenticación (solo para mostrar error amigable, el server action validará de nuevo)
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-      if (!user) throw new Error("No hay usuario autenticado");
+      if (authError || !user) {
+        throw new Error("Sesión expirada. Por favor, vuelve a iniciar sesión.");
+      }
 
+      if (!categoryId) {
+        setShowValidation(true);
+        throw new Error("Por favor, selecciona una categoría");
+      }
+
+      const numericAmount = type === "expense" ? -Math.abs(Number(amount)) : Math.abs(Number(amount));
+
+      // ✅ CORRECCIÓN IMPORTANTE: No enviamos user_id desde el cliente
+      // El server action se encargará de asignar el user_id autenticado
       const transactionData = {
-        user_id: user.id,
-        description,
-        amount: type === "expense" ? -Math.abs(Number(amount)) : Math.abs(Number(amount)),
+        description: description.trim(),
+        amount: numericAmount,
         category_id: categoryId,
-        date: date, // Usamos el string YYYY-MM-DD directamente
+        date: date,
       };
 
       const result = await saveTransaction(transactionData, transactionToEdit?.id);
@@ -172,29 +176,23 @@ export default function AddTransactionModal({
       if (!result.success) {
         throw new Error(result.error);
       }
-      
-      if (transactionToEdit) {
-        toast.success("Transacción editada con éxito");
-      } else {
-        toast.success("Transacción guardada correctamente");
-      }
+
+      toast.success(transactionToEdit ? "Transacción editada con éxito" : "Transacción guardada correctamente");
 
       handleClose();
-      // No need for router.refresh() if using revalidatePath in server action, 
-      // but it doesn't hurt to trigger a client-side update too.
       router.refresh();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error al guardar";
-      setErrorMsg(message);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Error al procesar la solicitud";
+      setErrorMsg(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
 
   return (
     <>
-      {/* Botón Disparador */}
       {showTrigger && (
-        <button 
+        <button
           onClick={() => setInternalIsOpen(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 active:scale-95"
         >
@@ -203,16 +201,13 @@ export default function AddTransactionModal({
         </button>
       )}
 
-      {/* Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div 
+          <div
             className="bg-[#0f172a] border border-slate-800 w-full max-w-md rounded-[2.5rem] shadow-2xl animate-in slide-in-from-bottom-4 duration-300 relative overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-8">
-              
-              {/* Header */}
               <div className="flex justify-between items-center mb-8">
                 <div>
                   <h2 className="text-2xl font-bold tracking-tight text-white">
@@ -222,8 +217,8 @@ export default function AddTransactionModal({
                     {transactionToEdit ? "Modifica los detalles del registro" : "Registra tus ingresos o gastos"}
                   </p>
                 </div>
-                <button 
-                  onClick={handleClose} 
+                <button
+                  onClick={handleClose}
                   className="p-2 hover:bg-slate-800 rounded-full opacity-50 hover:opacity-100 transition-all text-white"
                 >
                   <X size={20} />
@@ -237,17 +232,15 @@ export default function AddTransactionModal({
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                
-                {/* Selector de Tipo (Gasto/Ingreso) */}
                 <div className="flex p-1 bg-slate-900 rounded-2xl border border-slate-800">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setType("expense")}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${type === "expense" ? "bg-red-500/10 text-red-500 border border-red-500/20 shadow-sm" : "opacity-40 text-slate-400 hover:opacity-60"}`}
                   >
                     <ArrowDownCircle size={16} /> Gasto
                   </button>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setType("income")}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${type === "income" ? "bg-green-500/10 text-green-500 border border-green-500/20 shadow-sm" : "opacity-40 text-slate-400 hover:opacity-60"}`}
@@ -257,11 +250,9 @@ export default function AddTransactionModal({
                 </div>
 
                 <div className="space-y-4">
-                  
-                  {/* Descripción */}
                   <div className="space-y-2 text-white">
                     <label className="text-[10px] font-black uppercase tracking-widest opacity-30 ml-1">Descripción</label>
-                    <input 
+                    <input
                       required
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
@@ -270,9 +261,7 @@ export default function AddTransactionModal({
                     />
                   </div>
 
-                  {/* Selector de Categoría y Fecha (Fila) */}
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Selector de Categoría */}
                     <div className="space-y-2 text-white" ref={dropdownRef}>
                       <label className="text-[10px] font-black uppercase tracking-widest opacity-30 ml-1">Categoría</label>
                       <div className="relative">
@@ -280,8 +269,6 @@ export default function AddTransactionModal({
                           type="button"
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                           className={`w-full bg-slate-900 border p-4 rounded-2xl flex items-center justify-between hover:border-slate-700 transition-all outline-none focus:ring-2 focus:ring-blue-500 ${showValidation && !categoryId ? 'border-red-500/50' : 'border-slate-800'}`}
-                          aria-haspopup="listbox"
-                          aria-expanded={isDropdownOpen}
                         >
                           <div className="flex items-center gap-3 overflow-hidden">
                             <div className={`p-1.5 rounded-lg flex-shrink-0 ${categoryId ? 'bg-blue-500/10 text-blue-400' : 'text-slate-500 opacity-30'}`}>
@@ -312,8 +299,6 @@ export default function AddTransactionModal({
                                       setShowValidation(false);
                                     }}
                                     className={`w-full flex items-center gap-3 px-5 py-3.5 transition-colors text-left border-b border-slate-800/50 last:border-none ${categoryId === cat.id ? 'bg-blue-600/10' : 'hover:bg-slate-800'}`}
-                                    role="option"
-                                    aria-selected={categoryId === cat.id}
                                   >
                                     <div className={`p-1.5 rounded-lg ${categoryId === cat.id ? 'bg-blue-500 text-white' : 'bg-slate-800 text-blue-400'}`}>
                                       <DynamicIcon name={cat.icon} size={14} />
@@ -330,12 +315,11 @@ export default function AddTransactionModal({
                       </div>
                     </div>
 
-                    {/* Selector de Fecha */}
                     <div className="space-y-2 text-white">
                       <label className="text-[10px] font-black uppercase tracking-widest opacity-30 ml-1">Fecha</label>
                       <div className="relative">
                         <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30 pointer-events-none" />
-                        <input 
+                        <input
                           type="date"
                           value={date}
                           onChange={(e) => setDate(e.target.value)}
@@ -345,12 +329,11 @@ export default function AddTransactionModal({
                     </div>
                   </div>
 
-                  {/* Monto */}
                   <div className="space-y-2 text-white">
                     <label className="text-[10px] font-black uppercase tracking-widest opacity-30 ml-1">Monto</label>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold opacity-30">$</span>
-                      <input 
+                      <input
                         required
                         type="number"
                         step="0.01"
@@ -363,9 +346,9 @@ export default function AddTransactionModal({
                   </div>
                 </div>
 
-                {/* Submit Button */}
-                <button 
+                <button
                   disabled={loading}
+                  type="submit"
                   className={`w-full py-4 rounded-2xl font-bold shadow-lg transition-all active:scale-[0.98] text-white mt-4 ${loading ? 'opacity-50 cursor-not-allowed bg-slate-800' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'}`}
                 >
                   {loading ? (

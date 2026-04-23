@@ -166,9 +166,8 @@ export default async function HomePage({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className={`font-black text-lg tabular-nums ${
-                    tx.amount > 0 ? 'text-green-500' : 'text-red-400'
-                  }`}>
+                  <p className={`font-black text-lg tabular-nums ${tx.amount > 0 ? 'text-green-500' : 'text-red-400'
+                    }`}>
                     {tx.amount > 0 ? '+' : '-'}{formatAmount(tx.amount)}
                   </p>
                 </div>

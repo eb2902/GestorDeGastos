@@ -29,13 +29,13 @@ interface TransactionTableProps {
   currency?: string;
 }
 
-import { deleteTransactionAction } from "@/app/actions/transactions";
+import { deleteTransaction } from "@/app/actions/transactions";
 
 export default function TransactionTable({ transactions, currency = "USD" }: TransactionTableProps) {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTransactionId, setDeletingTransactionId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get("query");
@@ -52,18 +52,14 @@ export default function TransactionTable({ transactions, currency = "USD" }: Tra
 
   const handleDelete = async () => {
     if (!deletingTransactionId) return;
-    
+
     setIsDeleting(true);
     try {
-      const result = await deleteTransactionAction(deletingTransactionId);
+      await deleteTransaction(deletingTransactionId); // Elimina la transacción
 
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      
       toast.success("Transacción eliminada correctamente");
       setDeletingTransactionId(null);
-      router.refresh();
+      router.refresh(); // Recarga la página para actualizar la lista
     } catch (error) {
       console.error("Error deleting transaction:", error);
       toast.error("Error al eliminar la transacción");
@@ -112,11 +108,10 @@ export default function TransactionTable({ transactions, currency = "USD" }: Tra
                   </div>
                 </td>
                 <td className="p-6">
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
-                    tx.amount > 0 
-                      ? 'bg-green-500/10 text-green-500' 
-                      : 'bg-slate-800 text-slate-400'    
-                  }`}>
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${tx.amount > 0
+                    ? 'bg-green-500/10 text-green-500'
+                    : 'bg-slate-800 text-slate-400'
+                    }`}>
                     {tx.amount > 0 ? 'Ingreso' : 'Egreso'}
                   </span>
                 </td>
@@ -126,14 +121,14 @@ export default function TransactionTable({ transactions, currency = "USD" }: Tra
                 </td>
                 <td className="p-6 text-right">
                   <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
+                    <button
                       onClick={() => setEditingTransaction(tx)}
                       className="p-2 hover:bg-blue-500/10 text-slate-400 hover:text-blue-500 rounded-lg transition-all"
                       title="Editar"
                     >
                       <Pencil size={16} />
                     </button>
-                    <button 
+                    <button
                       onClick={() => setDeletingTransactionId(tx.id)}
                       className="p-2 hover:bg-red-500/10 text-slate-400 hover:text-red-500 rounded-lg transition-all"
                       title="Eliminar"
@@ -184,23 +179,22 @@ export default function TransactionTable({ transactions, currency = "USD" }: Tra
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex justify-between items-center pt-4 border-t border-slate-800/50">
-                <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
-                  tx.amount > 0 
-                    ? 'bg-green-500/10 text-green-500' 
-                    : 'bg-slate-800 text-slate-400'    
-                }`}>
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${tx.amount > 0
+                  ? 'bg-green-500/10 text-green-500'
+                  : 'bg-slate-800 text-slate-400'
+                  }`}>
                   {tx.amount > 0 ? 'Ingreso' : 'Egreso'}
                 </span>
                 <div className="flex gap-2">
-                  <button 
+                  <button
                     onClick={() => setEditingTransaction(tx)}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 text-blue-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                   >
                     <Pencil size={14} /> Editar
                   </button>
-                  <button 
+                  <button
                     onClick={() => setDeletingTransactionId(tx.id)}
                     className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                   >
@@ -218,7 +212,7 @@ export default function TransactionTable({ transactions, currency = "USD" }: Tra
       </div>
 
       {/* Edit Modal */}
-      <AddTransactionModal 
+      <AddTransactionModal
         transactionToEdit={editingTransaction}
         isOpen={!!editingTransaction}
         onClose={() => setEditingTransaction(null)}
@@ -226,7 +220,7 @@ export default function TransactionTable({ transactions, currency = "USD" }: Tra
       />
 
       {/* Delete Confirmation */}
-      <DeleteConfirmationModal 
+      <DeleteConfirmationModal
         isOpen={!!deletingTransactionId}
         onClose={() => setDeletingTransactionId(null)}
         onConfirm={handleDelete}

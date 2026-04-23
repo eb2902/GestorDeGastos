@@ -15,7 +15,9 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  const { count: transactionCount } = await getUserStats();
+  // Se obtiene count y total de las estadísticas del usuario
+  const stats = await getUserStats();
+  const transactionCount = stats.count;
 
   const fullName = user.user_metadata?.full_name || "Usuario";
   const email = user.email;
@@ -106,12 +108,12 @@ export default async function ProfilePage() {
 
           <section className="bg-red-500/5 border border-red-500/10 p-8 md:p-10 rounded-[2.5rem] relative overflow-hidden group">
             <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-red-500/5 rounded-full blur-3xl group-hover:bg-red-500/10 transition-colors" />
-            
+
             <h3 className="text-xl font-bold text-red-500 mb-3 flex items-center gap-3">
               <AlertTriangle size={22} /> Zona de Peligro
             </h3>
             <p className="text-sm text-slate-400 mb-8 max-w-md leading-relaxed">
-              Al eliminar tu cuenta, todos tus datos y transacciones se borrarán permanentemente. Esta acción no se puede deshacer y perderás acceso inmediato.
+              Al eliminar tu cuenta, todos tus datos y transacciones se borrarán permanentemente.
             </p>
             <DeleteAccountButton />
           </section>
