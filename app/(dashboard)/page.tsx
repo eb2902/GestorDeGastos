@@ -91,8 +91,8 @@ export default async function HomePage({
       </header>
 
       {/* SECCIÓN SUPERIOR: Balance Principal */}
-      <section className="mb-12">
-        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] shadow-2xl relative overflow-hidden text-white border border-white/10 group">
+      <section className="mb-12 animate-fade-in-up">
+        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] shadow-2xl relative overflow-hidden text-white border border-white/10 group hover:scale-[1.01] transition-all duration-500">
           {/* Decoración de fondo */}
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-700" />
           <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl" />
@@ -128,7 +128,7 @@ export default async function HomePage({
       </section>
 
       {/* SECCIÓN INFERIOR: Grid de 2 Columnas */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 animate-fade-in-up [animation-delay:200ms]">
         <section className="lg:col-span-2">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">

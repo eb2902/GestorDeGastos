@@ -4,6 +4,7 @@ import { User, Shield, Coins, History, Wallet, AlertTriangle } from "lucide-reac
 import ProfileForm from "../../../components/ProfileForm";
 import LogoutButton from "../../../components/auth/LogoutButton";
 import DeleteAccountButton from "../../../components/DeleteAccountButton";
+import CopyEmail from "@/components/CopyEmail";
 import { redirect } from "next/navigation";
 
 export default async function ProfilePage() {
@@ -26,9 +27,9 @@ export default async function ProfilePage() {
       <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] -z-10" />
       <div className="absolute top-1/2 -right-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-[120px] -z-10" />
 
-      <header className="mb-10">
+      <header className="mb-10 animate-fade-in-up">
         <h1 className="text-4xl font-black tracking-tight text-white flex items-center gap-4">
-          <div className="p-3 bg-blue-600 rounded-2xl shadow-xl shadow-blue-500/20 ring-1 ring-white/20">
+          <div className="p-3 bg-blue-600 rounded-2xl shadow-xl shadow-blue-500/20 ring-1 ring-white/20 group-hover:rotate-0 transition-transform">
             <User size={28} className="text-white" />
           </div>
           Mi Perfil
@@ -38,7 +39,7 @@ export default async function ProfilePage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-fade-in-up [animation-delay:100ms]">
         {/* Lado Izquierdo: Resumen Rápido */}
         <div className="md:col-span-1 space-y-6">
           <div className="glass-card p-8 rounded-[2.5rem] flex flex-col items-center text-center relative overflow-hidden group">
@@ -51,7 +52,7 @@ export default async function ProfilePage() {
             </div>
 
             <h2 className="text-2xl font-bold text-white tracking-tight">{fullName}</h2>
-            <p className="text-sm text-slate-500 font-medium">{email}</p>
+            <CopyEmail email={email || ""} />
 
             <div className="w-full h-px bg-slate-800/50 my-8" />
 

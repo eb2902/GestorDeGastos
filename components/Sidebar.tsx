@@ -1,7 +1,7 @@
 import { Wallet, LayoutDashboard, History, PieChart, Settings } from "lucide-react";
-import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import LogoutButton from "@/components/auth/LogoutButton";
+import NavItem from "./NavItem";
 
 export default async function Sidebar() {
   const supabase = await createClient();
@@ -11,7 +11,7 @@ export default async function Sidebar() {
 
   return (
     <div className="flex flex-col h-full p-6 lg:p-8 bg-[#020617] overflow-y-auto">
-      <div className="flex items-center gap-3 mb-12">
+      <div className="flex items-center gap-3 mb-12 group">
         <div className="bg-blue-600 p-2.5 rounded-2xl shadow-xl shadow-blue-500/20 rotate-3 group-hover:rotate-0 transition-transform">
           <Wallet className="text-white" size={24} />
         </div>
@@ -34,18 +34,5 @@ export default async function Sidebar() {
         <LogoutButton />
       </div>
     </div>
-  );
-}
-
-function NavItem({ icon, label, href }: { icon: React.ReactNode, label: string, href: string }) {
-  return (
-    <Link href={href}>
-      <div className="flex items-center gap-4 px-5 py-4 rounded-2xl cursor-pointer transition-all hover:bg-slate-900 border border-transparent hover:border-slate-800 group text-slate-400 hover:text-white">
-        <div className="opacity-40 group-hover:opacity-100 transition-opacity">
-          {icon}
-        </div>
-        <span className="font-bold text-sm tracking-tight">{label}</span>
-      </div>
-    </Link>
   );
 }
