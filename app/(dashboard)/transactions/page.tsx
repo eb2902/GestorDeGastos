@@ -3,7 +3,7 @@ import TransactionSearch from "@/components/TransactionSearch";
 import TransactionTable from "@/components/TransactionTable";
 import { formatCurrency } from "@/utils/formatters";
 import { Suspense } from "react";
-import { redirect } from "next/navigation"; // ← Importar redirect
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -22,7 +22,6 @@ export default async function TransactionsPage({
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        // Redirigir a la página de login (cambia la ruta si es necesario)
         redirect("/login");
     }
 
@@ -54,52 +53,59 @@ export default async function TransactionsPage({
     const totalIncomes = transactions?.filter(tx => tx.amount > 0).reduce((acc, tx) => acc + tx.amount, 0) || 0;
 
     return (
-        <div className="p-8 max-w-6xl mx-auto">
-            <Suspense fallback={<div>Cargando búsqueda...</div>}>
+        <div className="p-4 md:p-8 max-w-6xl mx-auto">
+            <Suspense fallback={<div className="text-slate-500 text-sm">Cargando búsqueda...</div>}>
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-white">
+                        <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
                             Todas las Transacciones
                         </h1>
-                        <p className="text-slate-400 text-sm mt-1">
+                        <p className="text-slate-400 text-xs md:text-sm mt-1 font-medium">
                             {query
                                 ? `Mostrando resultados para "${query}"`
                                 : "Historial completo de tus movimientos financieros."}
                         </p>
                     </div>
-                    <div className="w-full md:w-auto">
+                    <div className="w-full md:w-80">
                         <TransactionSearch />
                     </div>
                 </header>
             </Suspense>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl md:rounded-[2rem]">
+            {/* SECCIÓN DE MÉTRICAS CORREGIDA PARA MOBILE */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-10">
+                {/* Balance Card */}
+                <div className="bg-slate-900/40 border border-slate-800 p-5 md:p-6 rounded-3xl md:rounded-[2rem] overflow-hidden">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1 text-slate-400">
                         Balance Filtrado
                     </p>
-                    <h3 className={`text-2xl font-bold tabular-nums ${totalBalance >= 0 ? 'text-white' : 'text-red-400'}`}>
+                    <h3 className={`text-xl md:text-2xl font-black tabular-nums truncate ${totalBalance >= 0 ? 'text-white' : 'text-red-400'}`}>
                         {formatCurrency(totalBalance, currency)}
                     </h3>
                 </div>
-                <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl md:rounded-[2rem]">
+
+                {/* Gastos Card */}
+                <div className="bg-slate-900/40 border border-slate-800 p-5 md:p-6 rounded-3xl md:rounded-[2rem] overflow-hidden">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1 text-slate-400">
                         Total Gastos
                     </p>
-                    <h3 className="text-2xl font-bold tabular-nums text-white">
+                    <h3 className="text-xl md:text-2xl font-black tabular-nums text-white truncate">
                         {formatCurrency(Math.abs(totalExpenses), currency)}
                     </h3>
                 </div>
-                <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl md:rounded-[2rem]">
+
+                {/* Ingresos Card */}
+                <div className="bg-slate-900/40 border border-slate-800 p-5 md:p-6 rounded-3xl md:rounded-[2rem] overflow-hidden sm:col-span-2 lg:col-span-1">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1 text-slate-400">
                         Total Ingresos
                     </p>
-                    <h3 className="text-2xl font-bold tabular-nums text-green-500">
+                    <h3 className="text-xl md:text-2xl font-black tabular-nums text-green-500 truncate">
                         {formatCurrency(totalIncomes, currency)}
                     </h3>
                 </div>
             </div>
 
+            {/* Este componente debe manejar internamente el 'min-w-0' y 'truncate' en sus tarjetas móviles */}
             <TransactionTable transactions={transactions || []} currency={currency} />
         </div>
     );
