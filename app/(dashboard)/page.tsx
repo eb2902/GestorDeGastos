@@ -72,7 +72,7 @@ export default async function HomePage({
   const rangeLabel = range === '7D' ? 'últimos 7 días' : range === '1M' ? 'este mes' : 'este año';
 
   return (
-    <div className="max-w-6xl mx-auto pb-20">
+    <div className="max-w-6xl mx-auto pb-20 px-4 md:px-0">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div>
           <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white flex items-center gap-3">
@@ -92,7 +92,7 @@ export default async function HomePage({
 
       {/* SECCIÓN SUPERIOR: Balance Principal */}
       <section className="mb-12 animate-fade-in-up">
-        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] shadow-2xl relative overflow-hidden text-white border border-white/10 group hover:scale-[1.01] transition-all duration-500">
+        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] shadow-2xl relative overflow-hidden text-white border border-white/10 group hover:scale-[1.01] transition-all duration-500">
           {/* Decoración de fondo */}
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-700" />
           <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl" />
@@ -102,25 +102,29 @@ export default async function HomePage({
               <span className="text-[10px] font-black uppercase tracking-widest text-blue-100/60 mb-2">
                 Balance disponible • {rangeLabel}
               </span>
-              <h2 className="text-4xl md:text-7xl font-black tracking-tighter tabular-nums flex items-baseline">
+              <h2 className="text-4xl md:text-7xl font-black tracking-tighter tabular-nums flex items-baseline flex-wrap">
                 <span className="text-xl md:text-2xl opacity-50 mr-2">{currency === 'USD' ? '$' : 'AR$'}</span>
                 {balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h2>
             </div>
 
-            <div className="flex gap-4 md:gap-12 bg-black/20 backdrop-blur-md p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/5 justify-between md:justify-start">
-              <div>
+            {/* MEJORA AQUÍ: Grid 2 columnas en mobile, flex en desktop */}
+            <div className="grid grid-cols-2 md:flex gap-4 md:gap-12 bg-black/20 backdrop-blur-md p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/5">
+              <div className="min-w-0">
                 <span className="flex items-center gap-2 text-[10px] text-blue-100/60 mb-1 md:mb-2 font-black uppercase tracking-widest">
                   <ArrowUpCircle size={12} className="text-green-400" /> Ingresos
                 </span>
-                <span className="text-xl md:text-2xl font-bold block">{formatCurrency(totalIncome, currency)}</span>
+                <span className="text-lg md:text-2xl font-bold block truncate">{formatCurrency(totalIncome, currency)}</span>
               </div>
-              <div className="w-px h-8 md:h-10 bg-white/10 self-center" />
-              <div>
+
+              {/* Separador oculto en mobile si usamos el grid */}
+              <div className="hidden md:block w-px h-8 md:h-10 bg-white/10 self-center" />
+
+              <div className="min-w-0">
                 <span className="flex items-center gap-2 text-[10px] text-blue-100/60 mb-1 md:mb-2 font-black uppercase tracking-widest">
                   <ArrowDownCircle size={12} className="text-red-400" /> Gastos
                 </span>
-                <span className="text-xl md:text-2xl font-bold block">{formatCurrency(totalExpense, currency)}</span>
+                <span className="text-lg md:text-2xl font-bold block truncate">{formatCurrency(totalExpense, currency)}</span>
               </div>
             </div>
           </div>
@@ -141,32 +145,32 @@ export default async function HomePage({
 
           <div className="space-y-3">
             {transactions?.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between p-5 rounded-[2rem] bg-slate-900/40 border border-slate-800/50 hover:bg-slate-900/80 hover:border-blue-500/30 transition-all group">
-                <div className="flex items-center gap-5">
+              <div key={tx.id} className="flex items-center justify-between p-4 md:p-5 rounded-[1.5rem] md:rounded-[2rem] bg-slate-900/40 border border-slate-800/50 hover:bg-slate-900/80 hover:border-blue-500/30 transition-all group">
+                <div className="flex items-center gap-3 md:gap-5 min-w-0">
                   <div
-                    className="p-3.5 rounded-2xl shadow-inner"
+                    className="p-2.5 md:p-3.5 rounded-xl md:rounded-2xl shadow-inner flex-shrink-0"
                     style={{
                       backgroundColor: tx.categories?.color ? `${tx.categories.color}15` : '#1e293b',
                       color: tx.categories?.color || '#64748b'
                     }}
                   >
-                    <DynamicIcon name={tx.categories?.icon} size={24} />
+                    <DynamicIcon name={tx.categories?.icon} size={20} />
                   </div>
-                  <div>
-                    <p className="font-bold text-base text-slate-200 group-hover:text-white transition-colors">{tx.description}</p>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm md:text-base text-slate-200 group-hover:text-white transition-colors truncate">{tx.description}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] opacity-40 font-black uppercase tracking-widest bg-slate-800/50 px-2 py-0.5 rounded text-white">
+                      <span className="text-[9px] md:text-[10px] opacity-40 font-black uppercase tracking-widest bg-slate-800/50 px-1.5 py-0.5 rounded text-white truncate max-w-[80px] md:max-w-none">
                         {tx.categories?.name || 'General'}
                       </span>
                       <span className="text-slate-600 font-bold">•</span>
-                      <span className="text-[10px] text-slate-500 font-bold">
+                      <span className="text-[9px] md:text-[10px] text-slate-500 font-bold">
                         {formatDate(tx.date)}
                       </span>
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className={`font-black text-lg tabular-nums ${tx.amount > 0 ? 'text-green-500' : 'text-red-400'
+                <div className="text-right flex-shrink-0 ml-2">
+                  <p className={`font-black text-base md:text-lg tabular-nums ${tx.amount > 0 ? 'text-green-500' : 'text-red-400'
                     }`}>
                     {tx.amount > 0 ? '+' : '-'}{formatAmount(tx.amount)}
                   </p>
@@ -196,7 +200,6 @@ export default async function HomePage({
               {chartData.length > 0 ? (
                 <>
                   <ExpenseChart data={chartData} />
-                  {/* Centro del Donut (opcional, si el chart es donut) */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span className="text-[10px] font-black opacity-20 uppercase">Total</span>
                     <span className="text-lg font-black text-white">{formatCurrency(totalExpense, currency)}</span>
