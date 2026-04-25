@@ -91,7 +91,6 @@ export default function AddTransactionModal({
 
       if (data) {
         setCategories(data);
-        // Si ya hay una categoría seleccionada, actualizar nombre e ícono
         if (categoryId && (!selectedIcon || selectedCategoryName === "Seleccionar categoría")) {
           const cat = data.find(c => c.id === categoryId);
           if (cat) {
@@ -142,13 +141,38 @@ export default function AddTransactionModal({
     }
   };
 
+  // --- LÓGICA DE VALIDACIÓN DE MONTO ---
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Si el valor ingresado es negativo, lo convertimos a positivo automáticamente
+    if (Number(value) < 0) {
+      setAmount(Math.abs(Number(value)).toString());
+    } else {
+      setAmount(value);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Bloquea las teclas "-", "e" (exponente) y "+"
+    if (["-", "e", "E", "+"].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+
+    // Validación de seguridad: el monto debe ser mayor a cero
+    if (!amount || Number(amount) <= 0) {
+      setErrorMsg("Por favor, ingresa un monto válido mayor a 0");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Verificar autenticación (solo para mostrar error amigable, el server action validará de nuevo)
       const { data: { user }, error: authError } = await supabase.auth.getUser();
 
       if (authError || !user) {
@@ -160,10 +184,9 @@ export default function AddTransactionModal({
         throw new Error("Por favor, selecciona una categoría");
       }
 
+      // Aplicamos el signo según el tipo, pero el valor absoluto siempre es el que ingresó el usuario
       const numericAmount = type === "expense" ? -Math.abs(Number(amount)) : Math.abs(Number(amount));
 
-      // ✅ CORRECCIÓN IMPORTANTE: No enviamos user_id desde el cliente
-      // El server action se encargará de asignar el user_id autenticado
       const transactionData = {
         description: description.trim(),
         amount: numericAmount,
@@ -336,9 +359,11 @@ export default function AddTransactionModal({
                       <input
                         required
                         type="number"
+                        min="0"
                         step="0.01"
                         value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
+                        onChange={handleAmountChange}
+                        onKeyDown={handleKeyDown}
                         placeholder="0.00"
                         className="w-full bg-slate-900 border border-slate-800 p-4 pl-10 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold text-xl tabular-nums placeholder:text-slate-800"
                       />
