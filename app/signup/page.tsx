@@ -10,15 +10,28 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const supabase = createClient();
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg(null);
+
+    // Validaciones locales
+    if (fullName.trim().length < 3) {
+      setErrorMsg("El nombre debe tener al menos 3 caracteres");
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMsg("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
     setLoading(true);
 
     // 1. Registro en Auth de Supabase
-    // Eliminamos 'data' por completo para que ESLint no lance warnings
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -30,11 +43,10 @@ export default function SignupPage() {
     });
 
     if (error) {
-      alert("Error: " + error.message);
+      setErrorMsg(error.message);
       setLoading(false);
     } else {
-      alert("¡Cuenta creada! Revisa tu email para confirmar el registro.");
-      router.push("/login");
+      router.push("/login?message=Revisa tu email para confirmar el registro.");
     }
   };
 
@@ -63,6 +75,12 @@ export default function SignupPage() {
             <h2 className="text-3xl font-bold tracking-tight">Crear Cuenta</h2>
             <p className="text-sm opacity-50 mt-2 uppercase tracking-wider">Únete a FinanzApp</p>
           </div>
+
+          {errorMsg && (
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-sm font-bold animate-in fade-in zoom-in-95">
+              {errorMsg}
+            </div>
+          )}
 
           <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">

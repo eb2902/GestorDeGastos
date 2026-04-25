@@ -6,8 +6,20 @@ import { revalidatePath } from "next/cache";
 export async function updateUserMetadata(data: { full_name?: string; currency?: string }) {
   const supabase = await createClient();
 
+  // Validaciones de servidor
+  if (data.full_name && data.full_name.trim().length < 3) {
+    return { success: false, error: "El nombre debe tener al menos 3 caracteres" };
+  }
+
+  if (data.currency && !["USD", "ARS"].includes(data.currency)) {
+    return { success: false, error: "Moneda no soportada" };
+  }
+
   const { error } = await supabase.auth.updateUser({
-    data: data,
+    data: {
+      full_name: data.full_name?.trim(),
+      currency: data.currency,
+    },
   });
 
   if (error) {
@@ -16,6 +28,7 @@ export async function updateUserMetadata(data: { full_name?: string; currency?: 
   }
 
   revalidatePath("/profile");
+  revalidatePath("/"); // Revalidar el home por si se muestra la moneda allí
   return { success: true };
 }
 

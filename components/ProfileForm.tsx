@@ -16,11 +16,19 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
   const [currency, setCurrency] = useState(initialData.currency);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setErrorMsg(null);
     setSuccess(false);
+
+    if (fullName.trim().length < 3) {
+      setErrorMsg("El nombre debe tener al menos 3 caracteres");
+      return;
+    }
+
+    setLoading(true);
 
     const result = await updateUserMetadata({
       full_name: fullName,
@@ -31,7 +39,7 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } else {
-      alert("Error al actualizar el perfil: " + result.error);
+      setErrorMsg(result.error || "Error al actualizar el perfil");
     }
 
     setLoading(false);
@@ -39,6 +47,11 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {errorMsg && (
+        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-sm font-bold animate-in fade-in zoom-in-95">
+          {errorMsg}
+        </div>
+      )}
       <div className="space-y-3">
         <label className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Nombre Completo</label>
         <div className="relative group">
@@ -113,4 +126,3 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
     </form>
   );
 }
-

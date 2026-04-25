@@ -18,12 +18,27 @@ export async function saveTransaction(data: TransactionInput, id?: string) {
   if (!user) return { success: false, error: "No autorizado" };
 
   // VALIDACIONES DE SEGURIDAD (Capa de defensa final)
-  // 1. Evitar montos vacíos o en cero
+  // 1. Validar descripción
+  if (!data.description || data.description.trim().length === 0) {
+    return { success: false, error: "La descripción es obligatoria" };
+  }
+
+  // 2. Evitar montos vacíos o en cero
   if (!data.amount || data.amount === 0) {
     return { success: false, error: "El monto debe ser un valor válido distinto de cero" };
   }
 
-  // 2. Preparar y sanear los datos base
+  // 3. Validar categoría
+  if (!data.category_id) {
+    return { success: false, error: "La categoría es obligatoria" };
+  }
+
+  // 4. Validar fecha
+  if (!data.date || isNaN(Date.parse(data.date))) {
+    return { success: false, error: "La fecha no es válida" };
+  }
+
+  // 5. Preparar y sanear los datos base
   const transactionData = {
     description: data.description.trim().substring(0, 100), // Limitar longitud de descripción
     amount: parseFloat(data.amount.toFixed(2)), // Asegurar máximo 2 decimales para evitar errores de redondeo
