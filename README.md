@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gestor de Gastos Personales
 
-## Getting Started
+Un gestor de finanzas moderno, rápido y seguro construido con **Next.js**, **Supabase** y **Tailwind CSS**. Esta aplicación permite a los usuarios rastrear sus ingresos y gastos, visualizar su distribución financiera y gestionar su perfil personal.
 
-First, run the development server:
+## 🚀 Características
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+-   **Dashboard Interactivo**: Visualización clara del balance actual, ingresos y gastos totales.
+-   **Gráficos Dinámicos**: Distribución de gastos por categoría utilizando Recharts.
+-   **Gestión de Transacciones**: Añadir, buscar y eliminar transacciones de forma sencilla.
+-   **Filtros Temporales**: Visualiza tus datos por últimos 7 días, mes actual o último año.
+-   **Autenticación Segura**: Sistema de registro e inicio de sesión gestionado por Supabase.
+-   **Gestión de Perfil**: Personalización del nombre y moneda preferida (USD/ARS).
+-   **Diseño Responsivo**: Experiencia optimizada tanto para dispositivos móviles como para escritorio.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Tecnologías
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+-   **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
+-   **Base de Datos y Auth**: [Supabase](https://supabase.com/)
+-   **Estilos**: [Tailwind CSS](https://tailwindcss.com/)
+-   **Iconos**: [Lucide React](https://lucide.dev/)
+-   **Gráficos**: [Recharts](https://recharts.org/)
+-   **Componentes UI**: Radix UI / Shadcn (basado en Tailwind)
+-   **Notificaciones**: [Sonner](https://sonner.stevenly.me/)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📦 Instalación
 
-## Learn More
+1.  **Clonar el repositorio:**
+    ```bash
+    git clone https://github.com/eb2902/GestorDeGastos.git
+    cd GestorDeGastos
+    ```
 
-To learn more about Next.js, take a look at the following resources:
+2.  **Instalar dependencias:**
+    ```bash
+    npm install
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3.  **Configurar variables de entorno:**
+    Crea un archivo `.env.local` en la raíz del proyecto y añade tus credenciales de Supabase:
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4.  **Ejecutar el servidor de desarrollo:**
+    ```bash
+    npm run dev
+    ```
 
-## Deploy on Vercel
+## 🗄️ Estructura del Proyecto
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+-   `/app`: Rutas, layouts y lógica de páginas (Next.js App Router).
+    -   `/(dashboard)`: Rutas protegidas que requieren autenticación.
+    -   `/actions`: Server Actions para transacciones y gestión de usuario.
+-   `/components`: Componentes de React reutilizables (Tablas, Modales, Gráficos).
+-   `/utils`: Funciones de utilidad para formateo de moneda, fechas y cálculos matemáticos.
+-   `/public`: Archivos estáticos e imágenes.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📜 Scripts
+
+-   `npm run dev`: Inicia el servidor de desarrollo.
+-   `npm run build`: Crea la versión de producción de la aplicación.
+-   `npm run start`: Inicia la aplicación construida en modo producción.
+-   `npm run lint`: Ejecuta ESLint para revisar el código.
+
+---
+
