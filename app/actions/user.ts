@@ -59,3 +59,22 @@ export async function deleteAccount() {
   
   return { success: true, message: "Datos eliminados correctamente. Para eliminar la cuenta completa contacte a soporte o use el panel de control." };
 }
+
+export async function updatePassword(password: string) {
+  const supabase = await createClient();
+
+  if (password.length < 6) {
+    return { success: false, error: "La contraseña debe tener al menos 6 caracteres" };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: password,
+  });
+
+  if (error) {
+    console.error("Error updating password:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}

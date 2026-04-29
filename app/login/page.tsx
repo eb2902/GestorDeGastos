@@ -2,25 +2,48 @@
 import { useState } from "react";
 import { Wallet } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
+import { Suspense, useEffect } from "react";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#020617] flex items-center justify-center text-white">Cargando...</div>}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const message = searchParams.get("message");
+  const error = searchParams.get("error");
+
+  useEffect(() => {
+    if (message) {
+      toast.info(message);
+    }
+    if (error) {
+      toast.error(error);
+    }
+  }, [message, error]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
       
-      if (error) {
-        alert(error.message);
+      if (loginError) {
+        toast.error(loginError.message);
         setLoading(false);
         return;
       }
@@ -37,7 +60,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error("Error inesperado:", err);
-      alert("Ocurrió un error inesperado al intentar iniciar sesión.");
+      toast.error("Ocurrió un error inesperado al intentar iniciar sesión.");
       setLoading(false);
     }
   };
@@ -88,6 +111,11 @@ export default function LoginPage() {
                   className="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-white"
                   required
                 />
+                <div className="flex justify-end">
+                  <Link href="/forgot-password" shaking-text="true" className="text-xs font-bold text-blue-500 hover:underline opacity-70 hover:opacity-100 transition-opacity">
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </div>
               </div>
             </div>
 
