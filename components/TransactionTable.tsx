@@ -117,7 +117,7 @@ export default function TransactionTable({ transactions, currency = "USD" }: Tra
                 </td>
                 <td className={`p-6 text-right font-black tabular-nums text-lg ${tx.amount > 0 ? 'text-green-500' : 'text-white'}`}>
                   {tx.amount > 0 ? '+' : ''}
-                  {formatCurrency(tx.amount, currency).replace('$', '').replace('AR$', '')}
+                  {formatCurrency(tx.amount, currency).replace(/\$/g, '').replace(/AR\$/g, '')}
                 </td>
                 <td className="p-6 text-right">
                   <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
