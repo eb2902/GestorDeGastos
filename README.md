@@ -65,3 +65,8 @@ Un gestor de finanzas moderno, rápido y seguro construido con **Next.js**, **Su
 
 ---
 
+## 🔗 Enlaces y Contacto
+
+- **Demo en vivo:** [https://gestor-de-gastos-xi.vercel.app/login](https://gestor-de-gastos-xi.vercel.app/login)
+- **LinkedIn:** [Ezequiel Busto Hurtado](https://www.linkedin.com/in/ezequiel-busto-hurtado-948639406)
+
