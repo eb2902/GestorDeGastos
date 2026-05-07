@@ -1,11 +1,9 @@
 // components/LogoutButton.tsx (o donde lo tengas)
 "use client";
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LogoutButton() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async () => {
@@ -23,8 +21,9 @@ export default function LogoutButton() {
       const data = await response.json();
 
       if (data.success) {
-        // Redirige al login después de cerrar sesión
-        router.push("/login");
+        // Redirige al login después de cerrar sesión con navegación completa
+        // para que el middleware limpie correctamente el estado
+        window.location.href = "/login";
       } else {
         console.error("Error del servidor:", data.error);
         // Podrías mostrar un toast o notificación aquí

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Trash2, AlertTriangle, X } from "lucide-react";
 import { deleteAccount } from "@/app/actions/user";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function DeleteAccountButton() {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -14,11 +15,10 @@ export default function DeleteAccountButton() {
     setLoading(true);
     const result = await deleteAccount();
     if (result.success) {
-      alert(result.message || "Tus datos han sido eliminados.");
-      // Forzamos cierre de sesión o redirigimos
+      toast.success(result.message || "Cuenta eliminada correctamente.");
       router.push("/login");
     } else {
-      alert("Error al eliminar cuenta: " + result.error);
+      toast.error("Error al eliminar cuenta: " + result.error);
     }
     setLoading(false);
   };

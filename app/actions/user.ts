@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 export async function updateUserMetadata(data: { full_name?: string; currency?: string }) {
@@ -35,29 +36,46 @@ export async function updateUserMetadata(data: { full_name?: string; currency?: 
 export async function deleteAccount() {
   const supabase = await createClient();
 
-  // En Supabase Auth, un usuario no puede borrarse a sí mismo fácilmente via cliente
-  // A menos que uses la API de Admin. Pero podemos intentar borrar sus datos
-  // Y luego cerrar sesión. Para borrar la cuenta de Auth realmente se requiere Service Role.
-  // Por ahora simularemos el borrado de datos o daremos un mensaje.
-  
-  // Borrar transacciones del usuario
+  // 1. Obtener el usuario autenticado
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "No user found" };
 
-  const { error: deleteError } = await supabase
-    .from("transactions")
-    .delete()
-    .eq("user_id", user.id);
+  const userId = user.id;
 
-  if (deleteError) {
-    console.error("Error deleting user data:", deleteError);
-    return { success: false, error: deleteError.message };
+  // 2. Eliminar datos del usuario en tablas públicas
+  // Usamos el server client normal (con anon key + sesión) porque tiene RLS
+  // que permite al usuario eliminar sus propios registros.
+  const tablesToClean = ["transactions", "budgets", "profiles", "categories"];
+
+  for (const table of tablesToClean) {
+    const { error: deleteError } = await supabase
+      .from(table)
+      .delete()
+      .eq("user_id", userId);
+
+    if (deleteError) {
+      console.error(`Error deleting from ${table}:`, deleteError);
+      // No retornamos error inmediatamente, seguimos intentando
+    }
   }
 
-  // Nota: Para borrar el usuario de auth.users se requiere supabase.auth.admin.deleteUser(user.id)
-  // lo cual requiere una Service Role Key. No la tenemos configurada aquí por seguridad.
-  
-  return { success: true, message: "Datos eliminados correctamente. Para eliminar la cuenta completa contacte a soporte o use el panel de control." };
+  // 3. Eliminar la cuenta de auth.users usando el admin client (service_role)
+  const adminClient = createAdminClient();
+  const { error: adminDeleteError } = await adminClient.auth.admin.deleteUser(userId);
+
+  if (adminDeleteError) {
+    console.error("Error deleting auth user:", adminDeleteError);
+    return { success: false, error: adminDeleteError.message };
+  }
+
+  // 4. Cerrar sesión
+  await supabase.auth.signOut();
+
+  // 5. Revalidar rutas
+  revalidatePath("/");
+  revalidatePath("/profile");
+
+  return { success: true, message: "Cuenta eliminada correctamente." };
 }
 
 export async function updatePassword(password: string) {
