@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Wallet } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Suspense, useEffect } from "react";
@@ -20,7 +20,6 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const message = searchParams.get("message");
@@ -49,14 +48,9 @@ function LoginForm() {
       }
 
       if (data?.session) {
-        // 1. Refresca la ruta actual para sincronizar cookies con el servidor
-        router.refresh();
-        
-        // 2. Pequeña espera para asegurar que el middleware vea la sesión
-        // antes de ejecutar la redirección programática
-        setTimeout(() => {
-          router.push("/");
-        }, 100);
+        // El middleware de Next.js se encargará de refrescar la sesión
+        // y redirigir al dashboard automáticamente
+        window.location.href = "/";
       }
     } catch (err) {
       console.error("Error inesperado:", err);

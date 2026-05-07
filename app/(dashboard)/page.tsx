@@ -56,10 +56,11 @@ export default async function HomePage({
 
   const currency = user.user_metadata?.currency || 'USD';
 
-  // Consulta filtrada por fecha
+  // Consulta filtrada por fecha Y por usuario (seguridad)
   const { data: transactions, error } = await supabase
     .from('transactions')
     .select('*, categories(name, icon, color)')
+    .eq('user_id', user.id)
     .gte('date', start)
     .lte('date', end)
     .order('date', { ascending: false });
